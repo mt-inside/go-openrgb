@@ -99,21 +99,23 @@ type Device struct {
 	Version       string
 	Serial        string
 	Location      string
-	ActiveModeIdx uint32            // TODO change to *Mode
-	Modes         []*Mode           // TODO: what mean?
-	Zones         []*Zone           // TODO: what mean?
-	LEDs          []*LED            // TODO: what mean?
-	Colors        []*colorful.Color // TODO: what mean?
+	ActiveModeIdx uint32 // TODO change to *Mode
+	Modes         []*Mode
+	Zones         []*Zone
+	LEDs          []*LED
+	Colors        []*colorful.Color
 }
 
-// FIXME binary.Read() !!! Document - problem is the embedded variable-length strings. Use for modes / colours / LEDs ?
+// binary.Read() is neat, but every type (except for Color) has a headed string at the front, so that wouldn't work. Also requires construction of a Reader, which might be slow.
 
 func extractDevice(buf []byte) *Device {
 	d := &Device{}
 	offset := 0
 
-	foo := extractUint32(buf, &offset) // TODO what?
-	fmt.Println("TODO foo: ", foo)
+	totalLen := extractUint32(buf, &offset)
+	if len(buf) != int(totalLen) {
+		panic(fmt.Sprintf("Assertion failed: msg len %d does not match length header %d", len(buf), totalLen))
+	}
 
 	d.Type = DeviceType(extractUint32(buf, &offset))
 
@@ -123,16 +125,12 @@ func extractDevice(buf []byte) *Device {
 	d.Serial = extractString(buf, &offset)
 	d.Location = extractString(buf, &offset)
 
-	//TODO
 	d.Modes, d.ActiveModeIdx = extractModes(buf, &offset)
 
-	//TODO
 	d.Zones = extractZones(buf, &offset)
 
-	//TODO
 	d.LEDs = extractLEDs(buf, &offset)
 
-	//TODO
 	d.Colors = extractColors(buf, &offset)
 
 	return d

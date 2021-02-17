@@ -13,7 +13,7 @@ Command: TODO
 
 ### Response
 ```
-??? : 4
+TotalLen : 4 - Not needed since everything else is of a predictable / stated size
 type : 4
 name : bstring
 description
@@ -66,13 +66,3 @@ Semantics
   * Devices have Colors
     * These are the actual colors of the LEDs
     * They seem to match to LEDs (and thus pack into Zones) just based on index correspondance
-
-TODO object model
-* Put device.Colors in device.LEDs as "actualColor" or summat
-* Put device.LEDs in their Zones (just linear pack)
-* Put Zones under Mode Direct
-  * For other Modes, fake up a "Mode Specific" Zone, like the UI does
-* ability to change color on: all devices / Device / Zone / LED (like in the UI) - should get all LEDs in it. SetColor() func
-* Get everything by name (with func, or expose a map)
-
-rename to lightload. example: find all the LEDs and turn them on one at a time, 1s each
