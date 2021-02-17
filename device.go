@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/lucasb-eyer/go-colorful"
 )
 
@@ -86,10 +85,11 @@ func fetchDevice(c *Client, i int) (*Device, error) {
 }
 
 //go:generate stringer -type=DeviceType
-type DeviceType uint32
+type DeviceType int
 
 const (
-	DevTypeUnknown = 0
+	Motherboard DeviceType = 0
+	DIMM        DeviceType = 1
 )
 
 type Device struct {
@@ -139,10 +139,13 @@ func extractDevice(buf []byte) *Device {
 }
 
 //go:generate stringer -type=ColorMode
-type ColorMode uint32
+type ColorMode int
 
 const (
-	ColorModeUnknown = 0
+	None         ColorMode = 0
+	PerLED       ColorMode = 1
+	ModeSpecific ColorMode = 2
+	Random       ColorMode = 3
 )
 
 type Mode struct {
@@ -156,7 +159,7 @@ type Mode struct {
 	Speed     uint32
 	Direction uint32
 	ColorMode ColorMode
-	Colors    []colorful.Color
+	Colors    []*colorful.Color
 }
 
 func extractModes(buf []byte, offset *int) (modes []*Mode, activeModeIdx uint32) {
@@ -186,8 +189,7 @@ func extractMode(buf []byte, offset *int) *Mode {
 	m.Direction = extractUint32(buf, offset)
 	m.ColorMode = ColorMode(extractUint32(buf, offset))
 
-	colors := extractColors(buf, offset) // FIXME
-	spew.Dump(colors)
+	m.Colors = extractColors(buf, offset) // FIXME
 
 	return m
 }
@@ -216,7 +218,8 @@ func extractColor(buf []byte, offset *int) *colorful.Color {
 type ZoneType uint32
 
 const (
-	ZoneTypeUnknown = 0
+	Zero ZoneType = 0
+	One  ZoneType = 1
 )
 
 type Zone struct {
