@@ -39,6 +39,25 @@ func extractString(buf []byte, offset *int) (value string) {
 	return
 }
 
+func insertUint8(buf []byte, offset *int, value uint8) {
+	buf[*offset] = value // similar endinaness concerns to extract8
+	*offset += int(reflect.TypeOf(value).Size())
+}
+func insertUint16(buf []byte, offset *int, value uint16) {
+	binary.LittleEndian.PutUint16(buf[*offset:], value)
+	*offset += int(reflect.TypeOf(value).Size())
+}
+func insertUint32(buf []byte, offset *int, value uint32) {
+	binary.LittleEndian.PutUint32(buf[*offset:], value)
+	*offset += int(reflect.TypeOf(value).Size())
+}
+func insertColor(buf []byte, offset *int, value colorful.Color) {
+	insertUint8(buf, offset, uint8(value.R*255.0))
+	insertUint8(buf, offset, uint8(value.G*255.0))
+	insertUint8(buf, offset, uint8(value.B*255.0))
+	*offset += 1 // Colors are padded to 4 bytes
+}
+
 // TODO think about the public API of all this.
 // Ideall hide eg send on client (keep it all in the same package and you can do that, despite separate classes)
 func FetchDevices(c *Client) ([]*Device, error) {
@@ -286,4 +305,21 @@ func extractLED(buf []byte, offset *int) *LED {
 	l.Value = extractUint32(buf, offset)
 
 	return l
+}
+
+// TODO refactor - should probably be on client?
+func getCommandLEDs(colors []colorful.Color) []byte {
+	colorsLen := len(colors)
+	bufLen := 4 + 2 + (colorsLen * 4) // TODO this using sizeof, but not reflect?
+	buf := make([]byte, bufLen)
+
+	offset := 0
+
+	insertUint32(buf, &offset, uint32(bufLen))
+	insertUint16(buf, &offset, uint16(colorsLen))
+	for _, color := range colors {
+		insertColor(buf, &offset, color)
+	}
+
+	return buf
 }
