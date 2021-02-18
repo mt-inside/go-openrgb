@@ -109,11 +109,11 @@ type Device struct {
 	Version       string
 	Serial        string
 	Location      string
-	ActiveModeIdx uint32 // TODO change to *Mode
+	ActiveModeIdx uint32 // TODO hide this, add functions for SetActiceMode(*Mode - got with ByName or whatever), GetActiceMode() *Mode
 	Modes         []*Mode
-	Zones         []*Zone
-	LEDs          []*LED
-	Colors        []*colorful.Color
+	Zones         []*Zone           // TODO move under all the directs.
+	LEDs          []*LED            // TODO move under Zone
+	Colors        []*colorful.Color // TODO move under LED
 }
 
 // binary.Read() is neat, but every type (except for Color) has a headed string at the front, so that wouldn't work. Also requires construction of a Reader, which might be slow.
@@ -157,17 +157,23 @@ const (
 )
 
 type Mode struct {
-	Name      string
-	Value     uint32
-	Flags     uint32
-	MinSpeed  uint32
-	MaxSpeed  uint32
-	MinColors uint32
-	MaxColors uint32
-	Speed     uint32
-	Direction uint32
+	Name string
+
+	Value uint32 // driver-internal
+	Flags uint32 // useful for the app, but idk what's in it
+
+	MinSpeed uint32
+	Speed    uint32 // speed of the effect
+	MaxSpeed uint32
+
+	Direction uint32 // direction of the effect
+
 	ColorMode ColorMode
-	Colors    []*colorful.Color
+
+	MinColors uint32 // min!=max => user-resizable? ie you can flash between 1, 2, 3, etc different colours
+	MaxColors uint32
+
+	Colors []*colorful.Color
 }
 
 func extractModes(buf []byte, offset *int) (modes []*Mode, activeModeIdx uint32) {
@@ -197,7 +203,7 @@ func extractMode(buf []byte, offset *int) *Mode {
 	m.Direction = extractUint32(buf, offset)
 	m.ColorMode = ColorMode(extractUint32(buf, offset))
 
-	m.Colors = extractColors(buf, offset) // FIXME
+	m.Colors = extractColors(buf, offset)
 
 	return m
 }
@@ -224,9 +230,9 @@ const (
 type Zone struct {
 	Name      string
 	Type      ZoneType
-	MinLEDs   uint32
+	MinLEDs   uint32 // min!=max => user-resizable (depending on what's plugged in)
 	MaxLEDs   uint32
-	TotalLEDs uint32
+	TotalLEDs uint32 // current size?
 }
 
 func extractZones(buf []byte, offset *int) []*Zone {
