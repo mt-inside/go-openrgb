@@ -93,20 +93,15 @@ func (c *Client) readMessage() (body []byte, err error) {
 const headerMagic = "ORGB"
 const headerLen = 16
 
-/* If this turns into a bottleneck, use a byte *array*, calculate offsets, copy() */
 func encodeHeader(deviceID, commandID, bodyLen uint32) []byte {
-	header := new(bytes.Buffer)
+	header := [headerLen]byte{}
 
-	header.Write([]byte(headerMagic))
-	binary.Write(header, binary.LittleEndian, deviceID)
-	binary.Write(header, binary.LittleEndian, commandID)
-	binary.Write(header, binary.LittleEndian, bodyLen)
+	copy(header[:], headerMagic)
+	binary.LittleEndian.PutUint32(header[4:8], deviceID)
+	binary.LittleEndian.PutUint32(header[8:12], commandID)
+	binary.LittleEndian.PutUint32(header[12:16], bodyLen)
 
-	if header.Len() != headerLen {
-		panic(fmt.Sprintf("Assertion failed: header len %d should be %d", header.Len(), headerLen))
-	}
-
-	return header.Bytes()
+	return header[:]
 }
 
 func decodeHeader(header []byte) (commandID, deviceID, bodyLen uint32) {
