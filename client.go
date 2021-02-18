@@ -105,10 +105,15 @@ func encodeHeader(deviceID, commandID, bodyLen uint32) []byte {
 }
 
 func decodeHeader(header []byte) (commandID, deviceID, bodyLen uint32) {
+	l := len(header)
+	if l != headerLen {
+		panic(fmt.Sprintf("Header length incorrect. Expected: %d, got: %d", headerLen, l))
+	}
+
 	magic := string(header[0:4])
 	if magic != headerMagic {
 		// Too deep to start returning errors-as-values
-		panic(fmt.Sprintf("Header missing magic. Expected: %s, got: %s", headerMagic, header))
+		panic(fmt.Sprintf("Header missing magic. Expected: %s, got: %s", headerMagic, magic))
 	}
 
 	return binary.LittleEndian.Uint32(header[4:8]),
