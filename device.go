@@ -265,7 +265,7 @@ func extractZone(buf []byte, offset *int) *Zone {
 
 type LED struct {
 	Name  string
-	Color *colorful.Color
+	Value uint32 // driver-internal, eg LED mapping
 }
 
 func extractLEDs(buf []byte, offset *int) []*LED {
@@ -283,7 +283,7 @@ func extractLED(buf []byte, offset *int) *LED {
 	l := &LED{}
 
 	l.Name = extractString(buf, offset)
-	l.Color = extractColor(buf, offset)
+	l.Value = extractUint32(buf, offset)
 
 	return l
 }
