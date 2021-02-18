@@ -17,12 +17,12 @@ type Client struct {
 type Command int
 
 const (
-	cmdGetDevCnt              = 0
-	cmdGetDevData             = 1
-	cmdSetClientName  Command = 50
-	cmdUpdateLEDs             = 1050
-	cmdUpdateZoneLEDs         = 1051
-	cmdSetCustomMode          = 1100
+	cmdGetDevCnt             = 0
+	cmdGetDevData            = 1
+	cmdSetClientName Command = 50
+	cmdUpdateLEDs            = 1050
+	//cmdUpdateZoneLEDs         = 1051
+	//cmdSetCustomMode          = 1100
 )
 
 func NewClient(addr, userAgent string) (*Client, error) {
