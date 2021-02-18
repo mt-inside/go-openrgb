@@ -88,7 +88,7 @@ func fetchDevice(c *Client, i uint32) (*Device, error) {
 		return &Device{}, fmt.Errorf("Couldn't fetch Device %d: %w", i, err)
 	}
 
-	device := extractDevice(body)
+	device := extractDevice(body, i)
 
 	return device, nil
 }
@@ -102,6 +102,7 @@ const (
 )
 
 type Device struct {
+	Index         uint32
 	Type          DeviceType
 	Name          string
 	Description   string
@@ -117,8 +118,8 @@ type Device struct {
 
 // binary.Read() is neat, but every type (except for Color) has a headed string at the front, so that wouldn't work. Also requires construction of a Reader, which might be slow.
 
-func extractDevice(buf []byte) *Device {
-	d := &Device{}
+func extractDevice(buf []byte, idx uint32) *Device {
+	d := &Device{Index: idx}
 	offset := 0
 
 	totalLen := extractUint32(buf, &offset)
