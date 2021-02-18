@@ -23,6 +23,15 @@ func extractUint32(buf []byte, offset *int) uint32 {
 	*offset += int(reflect.TypeOf(value).Size())
 	return value
 }
+func extractColor(buf []byte, offset *int) *colorful.Color {
+	r := extractUint8(buf, offset)
+	g := extractUint8(buf, offset)
+	b := extractUint8(buf, offset)
+	*offset += 1 // Colors are padded to 4 bytes
+
+	return &colorful.Color{R: float64(r) / 255.0, G: float64(g) / 255.0, B: float64(b) / 255.0}
+}
+
 func extractString(buf []byte, offset *int) (value string) {
 	strLen := extractUint16(buf, offset)
 	value = string(buf[*offset : *offset+int(strLen)-1]) // The strings, despite having length headers, also contain a null terminator, which we don't need
@@ -201,15 +210,6 @@ func extractColors(buf []byte, offset *int) []*colorful.Color {
 	}
 
 	return cs
-}
-
-func extractColor(buf []byte, offset *int) *colorful.Color {
-	r := extractUint8(buf, offset)
-	g := extractUint8(buf, offset)
-	b := extractUint8(buf, offset)
-	*offset += 1 // Colors are padded to 4 bytes
-
-	return &colorful.Color{float64(r) / 255.0, float64(g) / 255.0, float64(b) / 255.0}
 }
 
 //go:generate stringer -type=ZoneType
