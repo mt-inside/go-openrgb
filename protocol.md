@@ -128,3 +128,7 @@ Semantics
   * Devices have Colors
     * These are the actual colors of the LEDs
     * They seem to match to LEDs (and thus pack into Zones) just based on index correspondance
+
+Examples
+* lightload - in progress
+* redshift - Configure it with which of your LEDs are "ambient", and it'll set them to yellow in the morning, green at lunch, purple in the evening, red at night (configurable color/time pairs, interpolate between them. Include option for "black" / off). Run as a oneshot (from cron) or daemon - use static mode not direct so oRGB doesn't hammer it.
