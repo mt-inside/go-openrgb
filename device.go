@@ -176,7 +176,8 @@ const (
 )
 
 type Mode struct {
-	Name string
+	Index uint16
+	Name  string
 
 	Value uint32 // driver-internal
 	Flags uint32 // useful for the app, but idk what's in it
@@ -196,19 +197,19 @@ type Mode struct {
 }
 
 func extractModes(buf []byte, offset *int) (modes []*Mode, activeModeIdx uint32) {
-	modeCount := int(extractUint16(buf, offset))
+	modeCount := extractUint16(buf, offset)
 	activeM := extractUint32(buf, offset)
 
 	ms := make([]*Mode, modeCount)
-	for i := 0; i < modeCount; i++ {
-		ms[i] = extractMode(buf, offset)
+	for i := uint16(0); i < modeCount; i++ {
+		ms[i] = extractMode(buf, offset, i)
 	}
 
 	return ms, activeM
 }
 
-func extractMode(buf []byte, offset *int) *Mode {
-	m := &Mode{}
+func extractMode(buf []byte, offset *int, idx uint16) *Mode {
+	m := &Mode{Index: idx}
 
 	m.Name = extractString(buf, offset)
 
@@ -247,6 +248,7 @@ const (
 )
 
 type Zone struct {
+	Index     uint16
 	Name      string
 	Type      ZoneType
 	MinLEDs   uint32 // min!=max => user-resizable (depending on what's plugged in)
@@ -255,18 +257,18 @@ type Zone struct {
 }
 
 func extractZones(buf []byte, offset *int) []*Zone {
-	zoneCount := int(extractUint16(buf, offset))
+	zoneCount := extractUint16(buf, offset)
 
 	zs := make([]*Zone, zoneCount)
-	for i := 0; i < zoneCount; i++ {
-		zs[i] = extractZone(buf, offset)
+	for i := uint16(0); i < zoneCount; i++ {
+		zs[i] = extractZone(buf, offset, i)
 	}
 
 	return zs
 }
 
-func extractZone(buf []byte, offset *int) *Zone {
-	z := &Zone{}
+func extractZone(buf []byte, offset *int, idx uint16) *Zone {
+	z := &Zone{Index: idx}
 
 	z.Name = extractString(buf, offset)
 
@@ -283,23 +285,24 @@ func extractZone(buf []byte, offset *int) *Zone {
 }
 
 type LED struct {
+	Index uint16
 	Name  string
 	Value uint32 // driver-internal, eg LED mapping
 }
 
 func extractLEDs(buf []byte, offset *int) []*LED {
-	ledsCount := int(extractUint16(buf, offset))
+	ledsCount := extractUint16(buf, offset)
 
 	ls := make([]*LED, ledsCount)
-	for i := 0; i < ledsCount; i++ {
-		ls[i] = extractLED(buf, offset)
+	for i := uint16(0); i < ledsCount; i++ {
+		ls[i] = extractLED(buf, offset, i)
 	}
 
 	return ls
 }
 
-func extractLED(buf []byte, offset *int) *LED {
-	l := &LED{}
+func extractLED(buf []byte, offset *int, idx uint16) *LED {
+	l := &LED{Index: idx}
 
 	l.Name = extractString(buf, offset)
 	l.Value = extractUint32(buf, offset)
