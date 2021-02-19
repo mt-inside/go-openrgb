@@ -16,11 +16,11 @@ type Client struct {
 type Command int
 
 const (
-	cmdGetDevCnt             = 0
-	cmdGetDevData            = 1
-	cmdSetClientName Command = 50
-	cmdUpdateLEDs            = 1050
-	//cmdUpdateZoneLEDs         = 1051
+	cmdGetDevCnt              = 0
+	cmdGetDevData             = 1
+	cmdSetClientName  Command = 50
+	cmdUpdateLEDs             = 1050
+	cmdUpdateZoneLEDs         = 1051
 	//cmdSetCustomMode          = 1100
 )
 

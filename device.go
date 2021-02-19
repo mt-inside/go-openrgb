@@ -323,3 +323,21 @@ func getCommandLEDs(colors []colorful.Color) []byte {
 
 	return buf
 }
+
+// This is for the subset of device LEDs in a zone, ie for direct mode.
+func getCommandZoneLEDs(zoneID uint32, colors []colorful.Color) []byte {
+	colorsLen := len(colors)
+	bufLen := 4 + 4 + 2 + (colorsLen * 4) // TODO this using sizeof, but not reflect?
+	buf := make([]byte, bufLen)
+
+	offset := 0
+
+	insertUint32(buf, &offset, uint32(bufLen))
+	insertUint32(buf, &offset, zoneID)
+	insertUint16(buf, &offset, uint16(colorsLen))
+	for _, color := range colors {
+		insertColor(buf, &offset, color)
+	}
+
+	return buf
+}
