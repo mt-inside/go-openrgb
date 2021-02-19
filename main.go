@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-logr/logr"
 	"github.com/lucasb-eyer/go-colorful"
@@ -30,19 +28,40 @@ func main() {
 	spew.Dump(devs)
 
 	buf := getCommandLEDs([]colorful.Color{
-		colorful.Color{R: 1, G: 0, B: 0},
-		colorful.Color{R: 1, G: 0, B: 0},
-		colorful.Color{R: 1, G: 0, B: 0},
-		colorful.Color{R: 1, G: 0, B: 0},
-		colorful.Color{R: 1, G: 0, B: 0},
-		colorful.Color{R: 1, G: 0, B: 0},
-		colorful.Color{R: 1, G: 0, B: 0},
-		colorful.Color{R: 1, G: 0, B: 0},
+		colorful.Hsv(300, 1, 0.1),
+		colorful.Hsv(300, 1, 0.1),
+		colorful.Hsv(300, 1, 0.1),
+		colorful.Hsv(300, 1, 0.1),
+		colorful.Hsv(300, 1, 0.1),
+		colorful.Hsv(300, 1, 0.1),
+		colorful.Hsv(300, 1, 0.1),
+		colorful.Hsv(300, 1, 0.1),
 	})
 	err = c.sendCommand(1, cmdUpdateLEDs, buf)
 	if err != nil {
 		log.Error(err, "Can't set device-level LEDs")
 	}
+	err = c.sendCommand(2, cmdUpdateLEDs, buf)
+	if err != nil {
+		log.Error(err, "Can't set device-level LEDs")
+	}
 
-	time.Sleep(time.Hour)
+	bufZ := getCommandZoneLEDs(1, []colorful.Color{
+		colorful.Hsv(240, 1, 0.1),
+		colorful.Hsv(240, 1, 0.1),
+		colorful.Hsv(240, 1, 0.1),
+		colorful.Hsv(240, 1, 0.1),
+		colorful.Hsv(240, 1, 0.1),
+		colorful.Hsv(240, 1, 0.1),
+		colorful.Hsv(240, 1, 0.1),
+		colorful.Hsv(240, 1, 0.1),
+		colorful.Hsv(240, 1, 0.1),
+		colorful.Hsv(240, 1, 0.1),
+		colorful.Hsv(240, 1, 0.1),
+		colorful.Hsv(240, 1, 0.1),
+	})
+	err = c.sendCommand(3, cmdUpdateZoneLEDs, bufZ)
+	if err != nil {
+		log.Error(err, "Can't set zone-level LEDs")
+	}
 }
