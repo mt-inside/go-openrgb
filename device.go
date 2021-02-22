@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/lucasb-eyer/go-colorful"
 )
@@ -116,8 +117,20 @@ func fetchDevice(c *Client, i uint32) (*Device, error) {
 type DeviceType int
 
 const (
-	Motherboard DeviceType = 0
-	DIMM        DeviceType = 1
+	Motherboard  DeviceType = 0
+	DIMM         DeviceType = 1
+	GPU          DeviceType = 2
+	Cooler       DeviceType = 3
+	LEDStrip     DeviceType = 4
+	Keyboard     DeviceType = 5
+	Mouse        DeviceType = 6
+	MouseMat     DeviceType = 7
+	Headset      DeviceType = 8
+	HeadsetStand DeviceType = 9
+	Gamepad      DeviceType = 10
+	Light        DeviceType = 11
+	Speaker      DeviceType = 12
+	Unknown      DeviceType = 13
 )
 
 type Device struct {
@@ -175,19 +188,71 @@ const (
 	Random       ColorMode = 3
 )
 
+//go:generate stringer -type=ModeDirection
+type ModeDirection int
+
+const (
+	Left       ModeDirection = 0
+	Right      ModeDirection = 1
+	Up         ModeDirection = 2
+	Down       ModeDirection = 3
+	Horizontal ModeDirection = 4
+	Vertical   ModeDirection = 5
+)
+
+type ModeFlags int
+
+const (
+	HasSpeed             ModeFlags = 1 << 0
+	HasDirectionLR       ModeFlags = 1 << 1
+	HasDirectionUD       ModeFlags = 1 << 2
+	HasDirectionHV       ModeFlags = 1 << 3
+	HasBrightness        ModeFlags = 1 << 4
+	HasPerLEDColor       ModeFlags = 1 << 5
+	HasModeSpecificColor ModeFlags = 1 << 6
+	HasRandomColor       ModeFlags = 1 << 7
+)
+
+var ModeFlag_names = []string{
+	"HasSpeed",
+	"HasDirectionLR",
+	"HasDirectionUD",
+	"HasDirectionHV",
+	"HasBrightness",
+	"HasPerLEDColor",
+	"HasModeSpecificColor",
+	"HasRandomColor",
+}
+
+// Can't find a library or generator for this
+func (f ModeFlags) String() string {
+	flagNames := []string{}
+
+	for i := 0; i < len(ModeFlag_names); i++ {
+		if (uint32(f) & (1 << i)) != 0 { // Cast is neccessary otherwise x&y is always false...
+			flagNames = append(flagNames, ModeFlag_names[i])
+		}
+	}
+
+	if len(flagNames) == 0 {
+		return "0"
+	}
+	return strings.Join(flagNames, "|")
+}
+
 type Mode struct {
 	Index uint16
 	Name  string
 
 	Value uint32 // driver-internal
-	Flags uint32 // useful for the app, but idk what's in it
 
 	MinSpeed uint32
 	Speed    uint32 // speed of the effect
 	MaxSpeed uint32
 
-	Direction uint32 // direction of the effect
+	Direction ModeDirection // direction of the effect
 
+	Flags     ModeFlags // OR of the available ColorModes (but different values??)
 	ColorMode ColorMode
 
 	MinColors uint32 // min!=max => user-resizable? ie you can flash between 1, 2, 3, etc different colours
@@ -214,13 +279,13 @@ func extractMode(buf []byte, offset *int, idx uint16) *Mode {
 	m.Name = extractString(buf, offset)
 
 	m.Value = extractUint32(buf, offset)
-	m.Flags = extractUint32(buf, offset)
+	m.Flags = ModeFlags(extractUint32(buf, offset))
 	m.MinSpeed = extractUint32(buf, offset)
 	m.MaxSpeed = extractUint32(buf, offset)
 	m.MinColors = extractUint32(buf, offset)
 	m.MaxColors = extractUint32(buf, offset)
 	m.Speed = extractUint32(buf, offset)
-	m.Direction = extractUint32(buf, offset)
+	m.Direction = ModeDirection(extractUint32(buf, offset))
 	m.ColorMode = ColorMode(extractUint32(buf, offset))
 
 	m.Colors = extractColors(buf, offset)
@@ -243,8 +308,9 @@ func extractColors(buf []byte, offset *int) []*colorful.Color {
 type ZoneType uint32
 
 const (
-	Zero ZoneType = 0
-	One  ZoneType = 1
+	Singular ZoneType = 0 // Doesn't imply precisely 1 LED. TODO what are the invariants.
+	Linear   ZoneType = 1
+	Planar   ZoneType = 2
 )
 
 type Zone struct {

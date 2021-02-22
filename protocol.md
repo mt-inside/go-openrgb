@@ -66,9 +66,10 @@ The API doesn't expose it like this, instead:
   * modes
     * color - only for zero/one/few color modes (mode_colors_mode_specific)
       * mode_colors_per_led -> use device->colours. CalcProgrammer1 isn't stupid, did this becuase there's >1 per-led mode on some devices and he was worried about multiple n-sized arrays.
+    * Value: opaque (driver-level); usually the hw's value for the mode.
   * zones -  Zone is just their sizing, and physical layout if applicable "matrix" (keyboards). (1D and 2D zones are both represented as vectors.)
   * LEDs - all of them for the device. Match them to zones by counting the indexes
-    * these have a color and I've no clue what it does ("you usually don't care")
+    * The int field on these is not color. It's an opaque value (driver-level), often used to stash the register/address of the LED
   * Colors - all of them for the device. Match them to the LEDs by comparing indecies
     * THis is what you, or another sdk / gui, has set for direct mode, so morally it is direct's colors
     * it doesn't let you sample colors, eg if the device is in Breathing, you can't watch the brightness go up and down
@@ -94,6 +95,7 @@ lib: impliment object model above.
 * How to do? I think:
   * keep current structs, all internal, named to wireFoo, decode into them (not least, binary.read in future)
   * make new structs for desired object model, build from wireFoo
+    * drop the opaque Value fields
     * hide all fields, do mut-ness with getters and (fewer) setters
     * do the diff thing too, and a pretty-print of it
     * setters for resizing Zones' LEDs and Modes' color-wheels
