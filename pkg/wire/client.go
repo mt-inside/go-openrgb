@@ -1,47 +1,59 @@
-package main
+package wire
 
 import (
 	"encoding/binary"
 	"fmt"
 	"net"
 
-	"github.com/davecgh/go-spew/spew"
+	"github.com/go-logr/logr"
 )
 
 type Client struct {
+	log  logr.Logger
 	sock net.Conn
 }
 
-//go:generate stringer -type=Command
-type Command int
+func NewClient(log logr.Logger, addr, userAgent string) (*Client, error) {
+	c := &Client{log: log.WithValues("server", addr)}
 
-const (
-	cmdGetDevCnt              = 0
-	cmdGetDevData             = 1
-	cmdSetClientName  Command = 50
-	cmdUpdateLEDs             = 1050
-	cmdUpdateZoneLEDs         = 1051
-	//cmdSetCustomMode          = 1100
-)
-
-func NewClient(addr, userAgent string) (*Client, error) {
 	sock, err := net.Dial("tcp", addr)
 	if err != nil {
 		return nil, fmt.Errorf("Couldn't connect to OpenRGB server at %s: %w", addr, err)
 	}
 
-	c := &Client{sock: sock}
+	c.sock = sock
 
-	err = c.sendCommand(0, cmdSetClientName, []byte(userAgent+" (go-openrgb)"))
+	err = c.sendCommand(0, cmdGetProtocolVersion, []byte{})
+	if err != nil {
+		c.Close()
+		return nil, fmt.Errorf("Couldn't get protocol version: %w", err)
+	}
+	body, err := c.readMessage()
+	if err != nil {
+		c.Close()
+		return nil, fmt.Errorf("Couldn't get protocol version: %w", err)
+	}
+	offset := 0
+	protoVer := extractUint32(body, &offset)
+	if protoVer != knownProtoVer {
+		c.Close()
+		return nil, fmt.Errorf("Server protocol version: %d; we support: %d", protoVer, knownProtoVer)
+	}
+
+	err = c.sendCommand(0, cmdSetClientName, []byte(userAgent))
 	if err != nil {
 		c.Close()
 		return nil, fmt.Errorf("Couldn't set client name: %w", err)
 	}
 
+	c.log.Info("Connected", "client name", userAgent, "protocol version", protoVer)
+
 	return c, nil
 }
 
 func (c *Client) Close() error {
+	c.log.Info("Disconnected")
+
 	return c.sock.Close()
 }
 
@@ -53,14 +65,14 @@ func (c *Client) sendCommand(deviceID uint32, commandID Command, body []byte) er
 	header := encodeHeader(uint32(deviceID), uint32(commandID), uint32(len(body)))
 
 	fmt.Printf(">>> ")
-	spew.Dump(header)
+	//spew.Dump(header)
 	_, err := c.sock.Write(header)
 	if err != nil {
 		return fmt.Errorf("Couldn't send message header: %w", err)
 	}
 
 	fmt.Printf(">++ ")
-	spew.Dump(body)
+	//spew.Dump(body)
 	_, err = c.sock.Write(body)
 	if err != nil {
 		return fmt.Errorf("Couldn't send message body: %w", err)
@@ -76,7 +88,7 @@ func (c *Client) readMessage() (body []byte, err error) {
 		return nil, fmt.Errorf("Couldn't read from server: %w", err)
 	}
 	fmt.Printf("<<< ")
-	spew.Dump(headerBytes)
+	//spew.Dump(headerBytes)
 	_, _, bodyLen := decodeHeader(headerBytes)
 
 	bodyBytes := make([]byte, bodyLen)
@@ -85,7 +97,7 @@ func (c *Client) readMessage() (body []byte, err error) {
 		return nil, fmt.Errorf("Couldn't read from server: %w", err)
 	}
 	fmt.Printf("<++ ")
-	spew.Dump(bodyBytes)
+	//spew.Dump(bodyBytes)
 	return bodyBytes, nil
 }
 
@@ -103,7 +115,7 @@ func encodeHeader(deviceID, commandID, bodyLen uint32) []byte {
 	return header[:]
 }
 
-func decodeHeader(header []byte) (commandID, deviceID, bodyLen uint32) {
+func decodeHeader(header []byte) (deviceId, commandId, bodyLen uint32) {
 	l := len(header)
 	if l != headerLen {
 		panic(fmt.Sprintf("Header length incorrect. Expected: %d, got: %d", headerLen, l))

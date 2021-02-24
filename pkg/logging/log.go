@@ -1,4 +1,4 @@
-package main
+package logging
 
 import (
 	golog "log"
@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func getLogger(devMode bool) logr.Logger {
+func GetLogger(devMode bool) logr.Logger {
 	var zapLog *zap.Logger
 	var err error
 

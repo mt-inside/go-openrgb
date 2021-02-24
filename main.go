@@ -1,67 +1,65 @@
 package main
 
 import (
-	"github.com/davecgh/go-spew/spew"
-	"github.com/go-logr/logr"
-	"github.com/lucasb-eyer/go-colorful"
-)
+	"fmt"
+	"os"
 
-var (
-	log logr.Logger
+	"github.com/mt-inside/go-openrgb/pkg/logging"
+	"github.com/mt-inside/go-openrgb/pkg/wire"
 )
-
-func init() {
-	log = getLogger(false)
-}
 
 func main() {
-	c, err := NewClient("localhost:6742", "mt is skill")
+	log := logging.GetLogger(false)
+
+	c, err := wire.NewClient(log, "localhost:6742", "mt is skill")
 	if err != nil {
-		log.Error(err, "Couldn't make client")
+		log.Error(err, "Couldn't connect")
+		os.Exit(1)
 	}
 	defer c.Close()
 
-	devs, err := FetchDevices(c)
+	devs, err := c.FetchDevices()
 	if err != nil {
 		log.Error(err, "Couldn't get devices")
 	}
-	spew.Dump(devs)
+	fmt.Println(len(devs))
+	//spew.Dump(devs)
 
-	buf := getCommandLEDs([]colorful.Color{
-		colorful.Hsv(300, 1, 0.1),
-		colorful.Hsv(300, 1, 0.1),
-		colorful.Hsv(300, 1, 0.1),
-		colorful.Hsv(300, 1, 0.1),
-		colorful.Hsv(300, 1, 0.1),
-		colorful.Hsv(300, 1, 0.1),
-		colorful.Hsv(300, 1, 0.1),
-		colorful.Hsv(300, 1, 0.1),
-	})
-	err = c.sendCommand(1, cmdUpdateLEDs, buf)
-	if err != nil {
-		log.Error(err, "Can't set device-level LEDs")
-	}
-	err = c.sendCommand(2, cmdUpdateLEDs, buf)
-	if err != nil {
-		log.Error(err, "Can't set device-level LEDs")
-	}
+	// buf := getCommandLEDs([]colorful.Color{
+	// 	colorful.Hsv(300, 1, 0.1),
+	// 	colorful.Hsv(300, 1, 0.1),
+	// 	colorful.Hsv(300, 1, 0.1),
+	// 	colorful.Hsv(300, 1, 0.1),
+	// 	colorful.Hsv(300, 1, 0.1),
+	// 	colorful.Hsv(300, 1, 0.1),
+	// 	colorful.Hsv(300, 1, 0.1),
+	// 	colorful.Hsv(300, 1, 0.1),
+	// })
+	// err = c.sendCommand(1, cmdUpdateLEDs, buf)
+	// if err != nil {
+	// 	log.Error(err, "Can't set device-level LEDs")
+	// }
+	// err = c.sendCommand(2, cmdUpdateLEDs, buf)
+	// if err != nil {
+	// 	log.Error(err, "Can't set device-level LEDs")
+	// }
 
-	bufZ := getCommandZoneLEDs(1, []colorful.Color{
-		colorful.Hsv(240, 1, 0.1),
-		colorful.Hsv(240, 1, 0.1),
-		colorful.Hsv(240, 1, 0.1),
-		colorful.Hsv(240, 1, 0.1),
-		colorful.Hsv(240, 1, 0.1),
-		colorful.Hsv(240, 1, 0.1),
-		colorful.Hsv(240, 1, 0.1),
-		colorful.Hsv(240, 1, 0.1),
-		colorful.Hsv(240, 1, 0.1),
-		colorful.Hsv(240, 1, 0.1),
-		colorful.Hsv(240, 1, 0.1),
-		colorful.Hsv(240, 1, 0.1),
-	})
-	err = c.sendCommand(3, cmdUpdateZoneLEDs, bufZ)
-	if err != nil {
-		log.Error(err, "Can't set zone-level LEDs")
-	}
+	// bufZ := getCommandZoneLEDs(1, []colorful.Color{
+	// 	colorful.Hsv(240, 1, 0.1),
+	// 	colorful.Hsv(240, 1, 0.1),
+	// 	colorful.Hsv(240, 1, 0.1),
+	// 	colorful.Hsv(240, 1, 0.1),
+	// 	colorful.Hsv(240, 1, 0.1),
+	// 	colorful.Hsv(240, 1, 0.1),
+	// 	colorful.Hsv(240, 1, 0.1),
+	// 	colorful.Hsv(240, 1, 0.1),
+	// 	colorful.Hsv(240, 1, 0.1),
+	// 	colorful.Hsv(240, 1, 0.1),
+	// 	colorful.Hsv(240, 1, 0.1),
+	// 	colorful.Hsv(240, 1, 0.1),
+	// })
+	// err = c.sendCommand(3, cmdUpdateZoneLEDs, bufZ)
+	// if err != nil {
+	// 	log.Error(err, "Can't set zone-level LEDs")
+	// }
 }

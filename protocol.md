@@ -90,6 +90,16 @@ Direct: per-led, static, don't flash (constant packet stream, so can do rapid tr
 Custom: per-led, static, do flash (poersistent, not suitable for rapid transitions)
 Static: mode-specific, static, do flash
 
+what am lib? what am point?
+* this is mostly about werite. Reading doesn't seem too useful programatically, and I don't expect anyone to build an interactive client using this
+* but, to write, we need to know the "schema" - the devices and their configured sizes, so we need to read once - schema and LEDs come over the same request
+* we assume we're the only writer, and can just overwrite evertyhing. This massively simplifies things, otherwise we'd need a state object, TF style 3-way diff, and either overwrite or prompt for conflicts
+* becuase of this, we can just smash our object model up to the server
+* read colors into it, should you care, and modify from there
+* as a convenience, we'll provide a *local* diff, against what you last read (overwritten by our writes).
+* no schema write support for now
+
+* session: getSchema() [build middle objects, return new, no attempt to merge for now] -> syncColors() [into middle object] -> modify -> diff -> writeCOlors()
 
 lib: impliment object model above.
 * How to do? I think:
