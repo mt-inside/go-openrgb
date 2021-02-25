@@ -10,22 +10,23 @@ import (
 type ColorMode int
 
 const (
-	None         ColorMode = 0
-	PerLED       ColorMode = 1
-	ModeSpecific ColorMode = 2
-	Random       ColorMode = 3
+	ColorModeNone ColorMode = 0
+	PerLED        ColorMode = 1
+	ModeSpecific  ColorMode = 2
+	Random        ColorMode = 3
 )
 
-//go:generate stringer -type=ModeDirection
-type ModeDirection int
+//go:generate stringer -type=EffectDirection
+type EffectDirection int
 
 const (
-	Left       ModeDirection = 0
-	Right      ModeDirection = 1
-	Up         ModeDirection = 2
-	Down       ModeDirection = 3
-	Horizontal ModeDirection = 4
-	Vertical   ModeDirection = 5
+	Left        EffectDirection = 0
+	Right       EffectDirection = 1
+	Up          EffectDirection = 2
+	Down        EffectDirection = 3
+	Horizontal  EffectDirection = 4
+	Vertical    EffectDirection = 5
+	DirectionNA EffectDirection = 65535 // Not on the wire; our placeholder
 )
 
 type ModeFlags int
@@ -46,14 +47,22 @@ var ModeFlag_names = []string{
 	"HasDirectionLR",
 	"HasDirectionUD",
 	"HasDirectionHV",
-	"HasBrightness",
+	"HasBrightness", // But no brightness field?
 	"HasPerLEDColor",
 	"HasModeSpecificColor",
 	"HasRandomColor",
 }
 
+// NOT a method, as the Flag values are used outside this pacakge
+func ModeDirectionFlagsClear(f ModeFlags) bool {
+	return f&(HasDirectionLR|HasDirectionUD|HasDirectionHV) == 0
+}
+
 // Can't find a library or generator for this
 func (f ModeFlags) String() string {
+	if uint32(f) == 0 {
+		return "<none>"
+	}
 	flagNames := []string{}
 
 	for i := 0; i < len(ModeFlag_names); i++ {
@@ -62,10 +71,7 @@ func (f ModeFlags) String() string {
 		}
 	}
 
-	if len(flagNames) == 0 {
-		return "0"
-	}
-	return strings.Join(flagNames, "|")
+	return strings.Join(flagNames, ",")
 }
 
 type Mode struct {
@@ -78,7 +84,7 @@ type Mode struct {
 	Speed    uint32 // speed of the effect
 	MaxSpeed uint32
 
-	Direction ModeDirection // direction of the effect
+	Direction EffectDirection // direction of the effect
 
 	Flags     ModeFlags // available ColorModes, Directions, and other attributes
 	ColorMode ColorMode
@@ -113,8 +119,21 @@ func extractMode(buf []byte, offset *int, idx uint16) *Mode {
 	m.MinColors = extractUint32(buf, offset)
 	m.MaxColors = extractUint32(buf, offset)
 	m.Speed = extractUint32(buf, offset)
-	m.Direction = ModeDirection(extractUint32(buf, offset))
+	m.Direction = EffectDirection(extractUint32(buf, offset))
 	m.ColorMode = ColorMode(extractUint32(buf, offset))
+
+	if m.Flags&HasSpeed != HasSpeed {
+		m.MinSpeed = 0 // Uninitialised if flag is clear (nasty cause 0 is a valid Speed)
+		m.Speed = 0
+		m.MaxSpeed = 0
+	}
+	if ModeDirectionFlagsClear(m.Flags) {
+		m.Direction = DirectionNA
+	}
+	if m.ColorMode == ColorModeNone {
+		m.MinColors = 0 // These seem uninitialised if Color Mode is None
+		m.MaxColors = 0
+	}
 
 	m.Colors = extractColors(buf, offset)
 

@@ -55,10 +55,10 @@ Object Model
   * A device has Modes
     * A Mode has color(s)
       * Color Cycle, etc: 0
-      * Breathing, etc: 1
+      * Breathing, etc: 1+
       * Direct: n
         * In Direct Mode, you care about the individual LEDs
-        * A device has Zone
+        * A device has Zones
           * Zones have (named) LEDS
             * LEDs have a color
 The API doesn't expose it like this, instead:
