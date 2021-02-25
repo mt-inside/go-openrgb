@@ -101,6 +101,11 @@ what am lib? what am point?
 
 * session: getSchema() [build middle objects, return new, no attempt to merge for now] -> syncColors() [into middle object] -> modify -> diff -> writeCOlors()
 
+TODO to GH. Add
+* get building on windows...
+* wtf fan curves (reboot to look. custom silent to 60?)
+  * ask on reddit/amd - do I need to wait for the kernel to see all my fans? Doesn't seem to be any config for this module.
+
 lib: impliment object model above.
 * How to do? I think:
   * keep current structs, all internal, named to wireFoo, decode into them (not least, binary.read in future)
@@ -135,12 +140,13 @@ Semantics
     * Devices have Zones, which have a size (either device-defined or user-defined).
       * Zones don't contain LEDs in the object model, but it's just a linear carve-up
   * LEDs have Colors
-    * I have no idea what these do; they don't seem set to anything sensible
+    * This just names them
     * The actual color of the LED is in the Device Color array at the corresponding index
   * Devices have Colors
     * These are the actual colors of the LEDs
     * They seem to match to LEDs (and thus pack into Zones) just based on index correspondance
 
 Examples
+* current main
 * lightload - in progress
 * redshift - Configure it with which of your LEDs are "ambient", and it'll set them to yellow in the morning, green at lunch, purple in the evening, red at night (configurable color/time pairs, interpolate between them. Include option for "black" / off). Run as a oneshot (from cron) or daemon - use static mode not direct so oRGB doesn't hammer it.
