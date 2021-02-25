@@ -31,6 +31,7 @@ func (ms ModeList) DirectUnwrap() *DirectMode {
 
 type Mode interface {
 	GetName() string
+	SetColor(colorful.Color)
 	render(indent int) []indentedString
 }
 
@@ -44,11 +45,17 @@ type EffectMode struct {
 	colorMode wire.ColorMode
 	minColors uint32
 	maxColors uint32
-	colors    []colorful.Color
+	Colors    []colorful.Color
 }
 
 func (m *EffectMode) GetName() string {
 	return m.name
+}
+
+func (m *EffectMode) SetColor(c colorful.Color) {
+	for i := 0; i < len(m.Colors); i++ {
+		m.Colors[i] = c
+	}
 }
 
 func (m *EffectMode) render(indent int) []indentedString {
@@ -67,7 +74,7 @@ func (m *EffectMode) render(indent int) []indentedString {
 	if m.colorMode == wire.ColorModeNone {
 		ss = append(ss, indentedString{indent + 1, fmt.Sprintf("Colors: %s", m.colorMode)})
 	} else {
-		ss = append(ss, indentedString{indent + 1, fmt.Sprintf("Colors: %s, (%d-%d) %s", m.colorMode, m.minColors, m.maxColors, renderColors(m.colors))})
+		ss = append(ss, indentedString{indent + 1, fmt.Sprintf("Colors: %s, (%d-%d) %s", m.colorMode, m.minColors, m.maxColors, renderColors(m.Colors))})
 	}
 
 	return ss
@@ -83,6 +90,12 @@ type DirectMode struct {
 
 func (m *DirectMode) GetName() string {
 	return m.name
+}
+
+func (m *DirectMode) SetColor(c colorful.Color) {
+	for _, z := range m.Zones {
+		z.SetColor(c)
+	}
 }
 
 func (m *DirectMode) render(indent int) []indentedString {

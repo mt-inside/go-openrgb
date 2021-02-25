@@ -19,10 +19,10 @@ func main() {
 	}
 	fmt.Println(m)
 
-	m.Devices.ByNameUnwrap("B550 Vision D").Modes.DirectUnwrap().Zones.ByNameUnwrap("D_LED1 Bottom").Leds[0].SetColor(colorful.Hsv(120, 1, 1))
-	m.Devices.ByNameUnwrap("B550 Vision D").Modes.DirectUnwrap().Zones.ByNameUnwrap("D_LED1 Bottom").Leds[18].SetColor(colorful.Hsv(120, 1, 1))
-	//m.Devices.ByNameUnwrap("B550 Vision D").Modes.DirectUnwrap().Zones.ByNameUnwrap("D_LED1 Bottom").Leds[0].SetColor(colorful.Hsv(0, 0, 0))
-	m.Devices.ByNameUnwrap("B550 Vision D").Modes.DirectUnwrap().Zones.ByNameUnwrap("D_LED1 Bottom").Leds[18].SetColor(colorful.Hsv(0, 0, 0))
+	m.SetColor(colorful.Color{R: 1, G: 0, B: 0})
+	m.Devices.ByNameUnwrap("B550 Vision D").Modes.DirectUnwrap().SetColor(colorful.Color{R: 0, G: 1, B: 0})
+	m.Devices.ByNameUnwrap("B550 Vision D").Modes.DirectUnwrap().Zones.ByNameUnwrap("D_LED1 Bottom").SetColor(colorful.Color{R: 0, G: 0, B: 1})
+	m.Devices.ByNameUnwrap("B550 Vision D").Modes.DirectUnwrap().Zones.ByNameUnwrap("D_LED1 Bottom").Leds[0].SetColor(colorful.Color{R: 1, G: 1, B: 1})
 
 	m.Diff()
 

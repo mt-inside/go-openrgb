@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/lucasb-eyer/go-colorful"
 	"github.com/mt-inside/go-openrgb/pkg/wire"
 )
 
@@ -35,6 +36,12 @@ type Device struct {
 	location      string
 	activeModeIdx uint32 // TODO hide this, add functions for SetActiceMode(*Mode - got with ByName or whatever), GetActiceMode() *Mode
 	Modes         ModeList
+}
+
+func (d *Device) SetColor(c colorful.Color) {
+	for _, m := range d.Modes {
+		m.SetColor(c)
+	}
 }
 
 func (d *Device) render(indent int) []indentedString {

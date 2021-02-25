@@ -34,6 +34,12 @@ type Zone struct {
 	Leds     []*LED
 }
 
+func (z *Zone) SetColor(c colorful.Color) {
+	for _, l := range z.Leds {
+		l.SetColor(c)
+	}
+}
+
 func (z *Zone) render(indent int) []indentedString {
 	// We skip a level; not rendering LED names.
 	// Thus this is map()

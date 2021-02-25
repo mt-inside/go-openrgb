@@ -32,6 +32,12 @@ func NewModel(log logr.Logger, addr, userAgent string) (*Model, error) {
 	return model, nil
 }
 
+func (m *Model) SetColor(c colorful.Color) {
+	for _, d := range m.Devices {
+		d.SetColor(c)
+	}
+}
+
 func (model *Model) Thence(log logr.Logger) error {
 	wireDevs, err := wire.FetchDevices(model.client)
 	if err != nil {
@@ -64,8 +70,8 @@ func (model *Model) Thence(log logr.Logger) error {
 					minColors: wireMode.MinColors,
 					maxColors: wireMode.MaxColors,
 				}
-				modelMode.colors = make([]colorful.Color, len(wireMode.Colors))
-				copy(modelMode.colors, wireMode.Colors)
+				modelMode.Colors = make([]colorful.Color, len(wireMode.Colors))
+				copy(modelMode.Colors, wireMode.Colors)
 				modelDev.Modes = append(modelDev.Modes, modelMode)
 			} else {
 				ledOffset := uint32(0)
