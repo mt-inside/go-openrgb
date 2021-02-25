@@ -92,7 +92,7 @@ type Mode struct {
 	MinColors uint32 // min!=max => user-resizable? ie you can flash between 1, 2, 3, etc different colours
 	MaxColors uint32
 
-	Colors []*colorful.Color
+	Colors []colorful.Color
 }
 
 func extractModes(buf []byte, offset *int) (modes []*Mode, activeModeIdx uint32) {

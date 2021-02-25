@@ -52,10 +52,10 @@ func extractUint32(buf []byte, offset *int) uint32 {
 	return value
 }
 
-func extractColors(buf []byte, offset *int) []*colorful.Color {
+func extractColors(buf []byte, offset *int) []colorful.Color {
 	colorCount := int(extractUint16(buf, offset))
 
-	cs := make([]*colorful.Color, colorCount)
+	cs := make([]colorful.Color, colorCount)
 	for i := 0; i < colorCount; i++ {
 		cs[i] = extractColor(buf, offset)
 	}
@@ -63,13 +63,13 @@ func extractColors(buf []byte, offset *int) []*colorful.Color {
 	return cs
 }
 
-func extractColor(buf []byte, offset *int) *colorful.Color {
+func extractColor(buf []byte, offset *int) colorful.Color {
 	r := extractUint8(buf, offset)
 	g := extractUint8(buf, offset)
 	b := extractUint8(buf, offset)
 	*offset += 1 // Colors are padded to 4 bytes
 
-	return &colorful.Color{R: float64(r) / 255.0, G: float64(g) / 255.0, B: float64(b) / 255.0}
+	return colorful.Color{R: float64(r) / 255.0, G: float64(g) / 255.0, B: float64(b) / 255.0}
 }
 
 func extractString(buf []byte, offset *int) (value string) {

@@ -8,6 +8,27 @@ import (
 	"github.com/mt-inside/go-openrgb/pkg/wire"
 )
 
+type ModeList []Mode
+
+func (ms ModeList) Directs() []*DirectMode {
+	dms := []*DirectMode{}
+
+	for _, m := range ms {
+		if dm, ok := m.(*DirectMode); ok {
+			dms = append(dms, dm)
+		}
+	}
+
+	return dms
+}
+func (ms ModeList) DirectUnwrap() *DirectMode {
+	dms := ms.Directs()
+	if len(dms) != 1 {
+		panic("Not presicely 1 direct mode")
+	}
+	return dms[0]
+}
+
 type Mode interface {
 	GetName() string
 	render(indent int) []indentedString
@@ -23,7 +44,7 @@ type EffectMode struct {
 	colorMode wire.ColorMode
 	minColors uint32
 	maxColors uint32
-	colors    []*colorful.Color
+	colors    []colorful.Color
 }
 
 func (m *EffectMode) GetName() string {
@@ -57,7 +78,7 @@ func (m *EffectMode) String() string {
 
 type DirectMode struct {
 	name  string
-	Zones []*Zone
+	Zones ZoneList
 }
 
 func (m *DirectMode) GetName() string {

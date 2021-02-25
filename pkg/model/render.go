@@ -21,7 +21,7 @@ func renderIndents(ss []indentedString) string {
 	return sb.String()
 }
 
-func renderColors(cs []*colorful.Color) string {
+func renderColors(cs []colorful.Color) string {
 	var sb strings.Builder
 
 	sb.WriteString("[")

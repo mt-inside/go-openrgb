@@ -14,7 +14,7 @@ type Client struct {
 }
 
 func NewClient(log logr.Logger, addr, userAgent string) (*Client, error) {
-	c := &Client{log: log.WithValues("server", addr)}
+	c := &Client{log: log.WithName("client")}
 
 	sock, err := net.Dial("tcp", addr)
 	if err != nil {
@@ -46,7 +46,7 @@ func NewClient(log logr.Logger, addr, userAgent string) (*Client, error) {
 		return nil, fmt.Errorf("Couldn't set client name: %w", err)
 	}
 
-	c.log.Info("Connected", "client name", userAgent, "protocol version", protoVer)
+	c.log.Info("Connected", "user agent", userAgent, "protocol version", protoVer)
 
 	return c, nil
 }
@@ -64,14 +64,14 @@ func (c *Client) sendCommand(deviceID uint32, commandID Command, body []byte) er
 
 	header := encodeHeader(uint32(deviceID), uint32(commandID), uint32(len(body)))
 
-	fmt.Printf(">>> ")
+	c.log.Info(">> header", "device", deviceID, "command", commandID)
 	//spew.Dump(header)
 	_, err := c.sock.Write(header)
 	if err != nil {
 		return fmt.Errorf("Couldn't send message header: %w", err)
 	}
 
-	fmt.Printf(">++ ")
+	c.log.Info(">> body", "len", len(body))
 	//spew.Dump(body)
 	_, err = c.sock.Write(body)
 	if err != nil {
@@ -87,16 +87,16 @@ func (c *Client) readMessage() (body []byte, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("Couldn't read from server: %w", err)
 	}
-	fmt.Printf("<<< ")
 	//spew.Dump(headerBytes)
 	_, _, bodyLen := decodeHeader(headerBytes)
+	c.log.Info("<< header")
 
 	bodyBytes := make([]byte, bodyLen)
 	_, err = c.sock.Read(bodyBytes)
 	if err != nil {
 		return nil, fmt.Errorf("Couldn't read from server: %w", err)
 	}
-	fmt.Printf("<++ ")
+	c.log.Info("<< body", "len", len(bodyBytes))
 	//spew.Dump(bodyBytes)
 	return bodyBytes, nil
 }

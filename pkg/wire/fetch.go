@@ -40,7 +40,6 @@ func fetchDeviceCount(c *Client) (uint32, error) {
 	deviceCount := binary.LittleEndian.Uint32(body)
 
 	return deviceCount, nil
-
 }
 
 func fetchDevice(c *Client, i uint32) (*Device, error) {

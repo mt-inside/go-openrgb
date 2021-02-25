@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/lucasb-eyer/go-colorful"
 	"github.com/mt-inside/go-openrgb/pkg/logging"
 	"github.com/mt-inside/go-openrgb/pkg/model"
 )
@@ -13,46 +14,21 @@ func main() {
 
 	m, err := model.NewModel(log, "localhost:6742", "mt is skill")
 	if err != nil {
-		log.Error(err, "Couldn't synchronise devices")
+		log.Error(err, "Couldn't synchronise devices and colors from server")
 		os.Exit(1)
 	}
 	fmt.Println(m)
 
-	// buf := getCommandLEDs([]colorful.Color{
-	// 	colorful.Hsv(300, 1, 0.1),
-	// 	colorful.Hsv(300, 1, 0.1),
-	// 	colorful.Hsv(300, 1, 0.1),
-	// 	colorful.Hsv(300, 1, 0.1),
-	// 	colorful.Hsv(300, 1, 0.1),
-	// 	colorful.Hsv(300, 1, 0.1),
-	// 	colorful.Hsv(300, 1, 0.1),
-	// 	colorful.Hsv(300, 1, 0.1),
-	// })
-	// err = c.sendCommand(1, cmdUpdateLEDs, buf)
-	// if err != nil {
-	// 	log.Error(err, "Can't set device-level LEDs")
-	// }
-	// err = c.sendCommand(2, cmdUpdateLEDs, buf)
-	// if err != nil {
-	// 	log.Error(err, "Can't set device-level LEDs")
-	// }
+	m.Devices.ByNameUnwrap("B550 Vision D").Modes.DirectUnwrap().Zones.ByNameUnwrap("D_LED1 Bottom").Leds[0].SetColor(colorful.Hsv(120, 1, 1))
+	m.Devices.ByNameUnwrap("B550 Vision D").Modes.DirectUnwrap().Zones.ByNameUnwrap("D_LED1 Bottom").Leds[18].SetColor(colorful.Hsv(120, 1, 1))
+	//m.Devices.ByNameUnwrap("B550 Vision D").Modes.DirectUnwrap().Zones.ByNameUnwrap("D_LED1 Bottom").Leds[0].SetColor(colorful.Hsv(0, 0, 0))
+	m.Devices.ByNameUnwrap("B550 Vision D").Modes.DirectUnwrap().Zones.ByNameUnwrap("D_LED1 Bottom").Leds[18].SetColor(colorful.Hsv(0, 0, 0))
 
-	// bufZ := getCommandZoneLEDs(1, []colorful.Color{
-	// 	colorful.Hsv(240, 1, 0.1),
-	// 	colorful.Hsv(240, 1, 0.1),
-	// 	colorful.Hsv(240, 1, 0.1),
-	// 	colorful.Hsv(240, 1, 0.1),
-	// 	colorful.Hsv(240, 1, 0.1),
-	// 	colorful.Hsv(240, 1, 0.1),
-	// 	colorful.Hsv(240, 1, 0.1),
-	// 	colorful.Hsv(240, 1, 0.1),
-	// 	colorful.Hsv(240, 1, 0.1),
-	// 	colorful.Hsv(240, 1, 0.1),
-	// 	colorful.Hsv(240, 1, 0.1),
-	// 	colorful.Hsv(240, 1, 0.1),
-	// })
-	// err = c.sendCommand(3, cmdUpdateZoneLEDs, bufZ)
-	// if err != nil {
-	// 	log.Error(err, "Can't set zone-level LEDs")
-	// }
+	m.Diff()
+
+	err = m.Thither()
+	if err != nil {
+		log.Error(err, "Couldn't synchronise colors to server")
+		os.Exit(1)
+	}
 }

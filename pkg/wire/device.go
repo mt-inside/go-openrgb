@@ -34,11 +34,11 @@ type Device struct {
 	Version       string
 	Serial        string
 	Location      string
-	ActiveModeIdx uint32 // TODO hide this, add functions for SetActiceMode(*Mode - got with ByName or whatever), GetActiceMode() *Mode
+	ActiveModeIdx uint32
 	Modes         []*Mode
-	Zones         []*Zone           // TODO move under all the directs.
-	LEDs          []*LED            // TODO move under Zone
-	Colors        []*colorful.Color // TODO move under LED
+	Zones         []*Zone
+	LEDs          []*LED
+	Colors        []colorful.Color
 }
 
 func extractDevice(buf []byte, idx uint32) *Device {
