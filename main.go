@@ -5,25 +5,18 @@ import (
 	"os"
 
 	"github.com/mt-inside/go-openrgb/pkg/logging"
-	"github.com/mt-inside/go-openrgb/pkg/wire"
+	"github.com/mt-inside/go-openrgb/pkg/model"
 )
 
 func main() {
 	log := logging.GetLogger(false)
 
-	c, err := wire.NewClient(log, "localhost:6742", "mt is skill")
+	m, err := model.NewModel(log, "localhost:6742", "mt is skill")
 	if err != nil {
-		log.Error(err, "Couldn't connect")
+		log.Error(err, "Couldn't synchronise devices")
 		os.Exit(1)
 	}
-	defer c.Close()
-
-	devs, err := c.FetchDevices()
-	if err != nil {
-		log.Error(err, "Couldn't get devices")
-	}
-	fmt.Println(len(devs))
-	//spew.Dump(devs)
+	fmt.Println(m)
 
 	// buf := getCommandLEDs([]colorful.Color{
 	// 	colorful.Hsv(300, 1, 0.1),
