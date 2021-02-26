@@ -18,7 +18,7 @@ type Model struct {
 func NewModel(log logr.Logger, addr, userAgent string) (*Model, error) {
 	model := &Model{log: log.WithName("model").WithValues("server", addr)}
 
-	c, err := wire.NewClient(model.log, "localhost:6742", "mt is skill")
+	c, err := wire.NewClient(model.log, "localhost:6742", userAgent)
 	if err != nil {
 		return nil, fmt.Errorf("Couldn't connect: %w", err)
 	}
