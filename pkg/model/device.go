@@ -18,7 +18,7 @@ func (ds DeviceList) ByName(name string) (*Device, bool) {
 	}
 	return nil, false
 }
-func (ds DeviceList) ByNameUnwrap(name string) *Device {
+func (ds DeviceList) MustByName(name string) *Device {
 	d, ok := ds.ByName(name)
 	if !ok {
 		panic(fmt.Errorf("Device list doesn't contain: %s", name))

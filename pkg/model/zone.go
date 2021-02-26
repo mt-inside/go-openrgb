@@ -18,7 +18,7 @@ func (zs ZoneList) ByName(name string) (*Zone, bool) {
 	}
 	return nil, false
 }
-func (zs ZoneList) ByNameUnwrap(name string) *Zone {
+func (zs ZoneList) MustByName(name string) *Zone {
 	z, ok := zs.ByName(name)
 	if !ok {
 		panic(fmt.Errorf("Zone list doesn't contain: %s", name))

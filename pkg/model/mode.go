@@ -21,7 +21,7 @@ func (ms ModeList) Directs() []*DirectMode {
 
 	return dms
 }
-func (ms ModeList) DirectUnwrap() *DirectMode {
+func (ms ModeList) MustDirect() *DirectMode {
 	dms := ms.Directs()
 	if len(dms) != 1 {
 		panic("Not presicely 1 direct mode")
