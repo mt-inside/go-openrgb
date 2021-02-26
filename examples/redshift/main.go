@@ -1,7 +1,3 @@
-/*
-* Heavily inspired by: https://github.com/lucasb-eyer/go-colorful/blob/master/doc/gradientgen/gradientgen.go
- */
-
 package main
 
 import (
@@ -61,7 +57,7 @@ func main() {
 
 	wake, sleep := getSchedule()
 
-	keyPoints := gradientTable{
+	keyColors := gradientTable{
 		{mustParseHex("#000000"), mustParseDuration("0h")},
 		{mustParseHex("#000000"), wake},
 		{mustParseHex("#00ffff"), sunrise},
@@ -73,7 +69,7 @@ func main() {
 
 	for {
 		d := sinceMidnight(time.Now())
-		c := getColor(keyPoints, d)
+		c := getColor(keyColors, d)
 		m.SetColor(c)
 
 		err = m.Thither()
@@ -97,11 +93,14 @@ type gradientTable []struct {
 	time time.Duration
 }
 
+// Heavily inspired by: https://github.com/lucasb-eyer/go-colorful/blob/master/doc/gradientgen/gradientgen.go
 func getColor(gt gradientTable, t time.Duration) colorful.Color {
+	// before the first keycolor
 	if t < gt[0].time {
 		return gt[0].c
 	}
 
+	// in the range
 	for i := 0; i < len(gt)-1; i++ {
 		c1 := gt[i]
 		c2 := gt[i+1]
@@ -111,5 +110,6 @@ func getColor(gt gradientTable, t time.Duration) colorful.Color {
 		}
 	}
 
+	// after the last keycolor
 	return gt[len(gt)-1].c
 }
