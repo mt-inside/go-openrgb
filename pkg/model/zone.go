@@ -10,9 +10,17 @@ import (
 
 type ZoneList []*Zone
 
+/* OpenRGB models every device as having at least one zone; making a zone with a generic name like "DRAM" for devices (like DIMMs) that don't really have them.
+* This function just gets the one and only zone, where applicable */
+func (zs ZoneList) MustSingle() *Zone {
+	if len(zs) != 1 {
+		panic("Not precisely one zone")
+	}
+	return zs[0]
+}
 func (zs ZoneList) ByName(name string) (*Zone, bool) {
 	for _, z := range zs {
-		if strings.EqualFold(z.name, name) {
+		if strings.EqualFold(z.GetName(), name) {
 			return z, true
 		}
 	}
@@ -27,11 +35,22 @@ func (zs ZoneList) MustByName(name string) *Zone {
 }
 
 type Zone struct {
-	name     string
-	zoneType wire.ZoneType
-	minLEDs  uint32 // min!=max => user-resizable (depending on what's plugged in)
-	maxLEDs  uint32
-	Leds     []*LED
+	mode         Mode
+	name         string
+	zoneType     wire.ZoneType
+	minLEDs      uint32 // min!=max => user-resizable (depending on what's plugged in)
+	maxLEDs      uint32
+	matrixWidth  uint32
+	matrixHeight uint32
+	Leds         []*LED
+}
+
+func (z *Zone) GetName() string {
+	// never seen zones clash names, plus they have no wire index
+	return z.name
+}
+func (z *Zone) Size() int {
+	return len(z.Leds)
 }
 
 func (z *Zone) SetColor(c colorful.Color) {
@@ -39,19 +58,34 @@ func (z *Zone) SetColor(c colorful.Color) {
 		l.SetColor(c)
 	}
 }
+func (z *Zone) SetColors(cs []colorful.Color) {
+	if z.Size() != len(cs) {
+		panic(fmt.Errorf("Trying to set %d-led Zone with %d colors.", len(z.Leds), len(cs)))
+	}
+	for i := range z.Leds {
+		z.Leds[i].SetColor(cs[i])
+	}
+}
+
+func (z *Zone) Diff() {
+	var path [2]string
+	path[0] = z.GetName()
+	for _, l := range z.Leds {
+		path[1] = l.GetName()
+		if l.serverColor != l.newColor {
+			fmt.Printf("%s: %s -> %s\n", strings.Join(path[:], "/"), l.serverColor.Hex(), l.newColor.Hex())
+		}
+	}
+}
 
 func (z *Zone) render(indent int) []indentedString {
-	// We skip a level; not rendering LED names.
-	// Thus this is map()
-	colors := []colorful.Color{}
-	for _, led := range z.Leds {
-		colors = append(colors, led.newColor)
-	}
-
 	ss := []indentedString{
-		{indent, fmt.Sprintf("ZONE [%s] %s", z.zoneType, z.name)},
-		{indent + 1, fmt.Sprintf("LEDs: (%d-%d) %d:%s", z.minLEDs, z.maxLEDs, len(z.Leds), renderColors(colors))},
+		{indent, fmt.Sprintf("ZONE [%s] %s", z.zoneType, z.GetName())},
 	}
+	if z.zoneType == wire.Planar {
+		ss = append(ss, indentedString{indent + 1, fmt.Sprintf("Matrix %dx%d", z.matrixWidth, z.matrixHeight)})
+	}
+	ss = append(ss, indentedString{indent + 1, fmt.Sprintf("LEDs: (%d-%d) %d:%s", z.minLEDs, z.maxLEDs, len(z.Leds), renderLedColors(z.Leds))})
 
 	return ss
 

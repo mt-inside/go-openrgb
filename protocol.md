@@ -81,7 +81,7 @@ BUT! remeber this is the READ object model.
 
 to have direct control, try in order: direct (per-led, don't flash), custom (per-led, flash), static (one col, flash?)
 
-per-led mode (eg breathing) - how?
+per-led mode (eg breathing) - how represented?
 orthogonal
 * mode (static, breathing, etc). Call breathing etc dynamic. These have 0 (eg random), 1+ colors (eg flash one, flash between a few)
 * color_mode (mode-specfic ~=1, per-led == n)
@@ -146,7 +146,10 @@ Semantics
     * These are the actual colors of the LEDs
     * They seem to match to LEDs (and thus pack into Zones) just based on index correspondance
 
-TODO: publish go-sensors (or pick a name) (to openrgb discord), make lightload example with rxgo
+Separate PR so we can argue about it: Also if you'd accept a change in API semantics, I'd propose changing the current UPDATEMODE to NOT _set the active mode_, and I'd also rename it to SETMODEDESCRIPTION
+
+
+TODO: publish go-sensors (with get() and observable interfaces) (or pick a name) (to openrgb discord), make lightload example with rxgo
 Examples
 * X current main
 * lightload - in progress

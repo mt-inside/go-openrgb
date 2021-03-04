@@ -21,12 +21,26 @@ func renderIndents(ss []indentedString) string {
 	return sb.String()
 }
 
+//nolint:deadcode,unused
 func renderColors(cs []colorful.Color) string {
 	var sb strings.Builder
 
 	sb.WriteString("[")
 	for _, c := range cs {
 		sb.WriteString(c.Hex())
+		sb.WriteString(",")
+	}
+	sb.WriteString("]")
+
+	return sb.String()
+}
+
+func renderLedColors(ls []*LED) string {
+	var sb strings.Builder
+
+	sb.WriteString("[")
+	for _, l := range ls {
+		sb.WriteString(l.newColor.Hex())
 		sb.WriteString(",")
 	}
 	sb.WriteString("]")

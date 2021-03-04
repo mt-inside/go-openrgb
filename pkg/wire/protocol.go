@@ -2,6 +2,7 @@ package wire
 
 import (
 	"encoding/binary"
+	"fmt"
 	"reflect"
 
 	"github.com/lucasb-eyer/go-colorful"
@@ -53,10 +54,10 @@ func extractUint32(buf []byte, offset *int) uint32 {
 }
 
 func extractColors(buf []byte, offset *int) []colorful.Color {
-	colorCount := int(extractUint16(buf, offset))
+	colorCount := extractUint16(buf, offset)
 
 	cs := make([]colorful.Color, colorCount)
-	for i := 0; i < colorCount; i++ {
+	for i := uint16(0); i < colorCount; i++ {
 		cs[i] = extractColor(buf, offset)
 	}
 
@@ -85,22 +86,30 @@ func insertUint8(buf []byte, offset *int, value uint8) {
 	*offset += int(reflect.TypeOf(value).Size())
 }
 
-//nolint:deadcode,unused
 func insertUint16(buf []byte, offset *int, value uint16) {
 	binary.LittleEndian.PutUint16(buf[*offset:], value)
 	*offset += int(reflect.TypeOf(value).Size())
 }
 
-//nolint:deadcode,unused
 func insertUint32(buf []byte, offset *int, value uint32) {
 	binary.LittleEndian.PutUint32(buf[*offset:], value)
 	*offset += int(reflect.TypeOf(value).Size())
 }
 
-//nolint:deadcode,unused
 func insertColor(buf []byte, offset *int, value colorful.Color) {
 	insertUint8(buf, offset, uint8(value.R*255.0))
 	insertUint8(buf, offset, uint8(value.G*255.0))
 	insertUint8(buf, offset, uint8(value.B*255.0))
-	*offset += 1 // Colors are padded to 4 bytes
+	insertUint8(buf, offset, uint8(0)) // Colors are padded to 4 bytes
+}
+
+func insertString(buf []byte, offset *int, value string) {
+	origOffset := *offset
+	insertUint16(buf, offset, uint16(len(value)))
+	copy(buf[*offset:*offset+len(value)], value) // Assumes UTF8
+	*offset += len(value)                        // len(str) is byte len, not rune len
+	insertUint8(buf, offset, 0)                  // The strings, despite having length headers, also contain a null terminator, which we don't need
+	if *offset != origOffset+2+len(value)+1 {
+		panic(fmt.Errorf("Assertion failed: offset=%d, calculated=%d", *offset, 2+len(value)+1))
+	}
 }

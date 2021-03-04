@@ -43,7 +43,7 @@ func getSolarTimes(log logr.Logger) (sunrise, noon, sunset time.Duration, err er
 		Path:     "json",
 		RawQuery: query.Encode(),
 	}
-	log.Info("Querying sunrise-sunset.org", "url", url.String())
+	log.V(1).Info("Querying sunrise-sunset.org", "url", url.String())
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -89,7 +89,7 @@ func getSolarTimes(log logr.Logger) (sunrise, noon, sunset time.Duration, err er
 	sunset = extractDuration(times.Results.Sunset)
 	err = nil
 
-	log.Info("SolarTimes", "sunrise", sunrise, "noon", noon, "sunset", sunset)
+	log.V(2).Info("SolarTimes", "sunrise", sunrise, "noon", noon, "sunset", sunset)
 
 	return
 }

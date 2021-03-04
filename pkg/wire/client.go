@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/go-logr/logr"
 )
 
@@ -46,13 +47,13 @@ func NewClient(log logr.Logger, addr, userAgent string) (*Client, error) {
 		return nil, fmt.Errorf("Couldn't set client name: %w", err)
 	}
 
-	c.log.Info("Connected", "user agent", userAgent, "protocol version", protoVer)
+	c.log.V(2).Info("Connected", "user agent", userAgent, "protocol version", protoVer)
 
 	return c, nil
 }
 
 func (c *Client) Close() error {
-	c.log.Info("Disconnected")
+	c.log.V(2).Info("Disconnected")
 
 	return c.sock.Close()
 }
@@ -64,15 +65,19 @@ func (c *Client) sendCommand(deviceID uint32, commandID Command, body []byte) er
 
 	header := encodeHeader(uint32(deviceID), uint32(commandID), uint32(len(body)))
 
-	c.log.Info(">> header", "device", deviceID, "command", commandID)
-	//spew.Dump(header)
+	c.log.V(2).Info(">> header", "device", deviceID, "command", commandID)
+	if c.log.V(4).Enabled() {
+		spew.Dump(header)
+	}
 	_, err := c.sock.Write(header)
 	if err != nil {
 		return fmt.Errorf("Couldn't send message header: %w", err)
 	}
 
-	c.log.Info(">> body", "len", len(body))
-	//spew.Dump(body)
+	c.log.V(2).Info(">> body", "len", len(body))
+	if c.log.V(4).Enabled() {
+		spew.Dump(body)
+	}
 	_, err = c.sock.Write(body)
 	if err != nil {
 		return fmt.Errorf("Couldn't send message body: %w", err)
@@ -87,17 +92,21 @@ func (c *Client) readMessage() (body []byte, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("Couldn't read from server: %w", err)
 	}
-	//spew.Dump(headerBytes)
 	_, _, bodyLen := decodeHeader(headerBytes)
-	c.log.Info("<< header")
+	c.log.V(2).Info("<< header")
+	if c.log.V(4).Enabled() {
+		spew.Dump(headerBytes)
+	}
 
 	bodyBytes := make([]byte, bodyLen)
 	_, err = c.sock.Read(bodyBytes)
 	if err != nil {
 		return nil, fmt.Errorf("Couldn't read from server: %w", err)
 	}
-	c.log.Info("<< body", "len", len(bodyBytes))
-	//spew.Dump(bodyBytes)
+	c.log.V(2).Info("<< body", "len", len(bodyBytes))
+	if c.log.V(4).Enabled() {
+		spew.Dump(bodyBytes)
+	}
 	return bodyBytes, nil
 }
 

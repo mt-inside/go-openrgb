@@ -1,6 +1,7 @@
 package wire
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/lucasb-eyer/go-colorful"
@@ -75,7 +76,7 @@ func (f ModeFlags) String() string {
 }
 
 type Mode struct {
-	Index uint16
+	Index uint32
 	Name  string
 
 	Value uint32 // driver-internal
@@ -96,18 +97,23 @@ type Mode struct {
 }
 
 func extractModes(buf []byte, offset *int) (modes []*Mode, activeModeIdx uint32) {
-	modeCount := extractUint16(buf, offset)
+	/* Confirmed from OpenRGB source:
+	 * - number of modes is a `short`: https://gitlab.com/CalcProgrammer1/OpenRGB/-/blob/master/RGBController/RGBController.cpp#L510
+	 * - modes don't have an index when rendered into a Device; you have to track it
+	 * - but when rendered themselves, Modes' indecies are `int`:  https://gitlab.com/CalcProgrammer1/OpenRGB/-/blob/master/RGBController/RGBController.cpp#L792
+	 */
+	modeCount := uint32(extractUint16(buf, offset))
 	activeM := extractUint32(buf, offset)
 
 	ms := make([]*Mode, modeCount)
-	for i := uint16(0); i < modeCount; i++ {
+	for i := uint32(0); i < modeCount; i++ {
 		ms[i] = extractMode(buf, offset, i)
 	}
 
 	return ms, activeM
 }
 
-func extractMode(buf []byte, offset *int, idx uint16) *Mode {
+func extractMode(buf []byte, offset *int, idx uint32) *Mode {
 	m := &Mode{Index: idx}
 
 	m.Name = extractString(buf, offset)
@@ -136,6 +142,10 @@ func extractMode(buf []byte, offset *int, idx uint16) *Mode {
 	}
 
 	m.Colors = extractColors(buf, offset)
+
+	if m.ColorMode == ColorModeNone && len(m.Colors) != 0 {
+		panic(fmt.Errorf("Assertion failed: Assumed color mode 'none' would have zero colors"))
+	}
 
 	return m
 }
