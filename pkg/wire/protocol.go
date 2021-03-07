@@ -8,7 +8,7 @@ import (
 	"github.com/lucasb-eyer/go-colorful"
 )
 
-const knownProtoVer = 1
+const knownProtoVer = 2
 
 //go:generate stringer -type=Command
 type Command int
