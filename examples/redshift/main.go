@@ -7,7 +7,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/lucasb-eyer/go-colorful"
 	"github.com/mt-inside/go-openrgb/pkg/model"
-	"github.com/mt-inside/logging"
+	"github.com/mt-inside/go-usvc"
 )
 
 const userAgent = "go-openrgb-redshift"
@@ -42,8 +42,8 @@ func sinceMidnight(t time.Time) time.Duration {
 }
 
 func main() {
-	log := logging.GetLogger(false, 1)
-	signalCh := logging.InstallSignalHandlers(log)
+	log := usvc.GetLogger(false, 1)
+	signalCh := usvc.InstallSignalHandlers(log)
 
 	m, err := model.NewModel(log.WithName("go-openrgb"), "localhost:6742", userAgent)
 	if err != nil {

@@ -5,11 +5,11 @@ import (
 	"os"
 
 	"github.com/mt-inside/go-openrgb/pkg/model"
-	"github.com/mt-inside/logging"
+	"github.com/mt-inside/go-usvc"
 )
 
 func main() {
-	log := logging.GetLogger(false)
+	log := usvc.GetLogger(false)
 
 	m, err := model.NewModel(log, "localhost:6742", "go-openrgb info example")
 	if err != nil {
