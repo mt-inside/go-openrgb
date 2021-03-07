@@ -55,6 +55,10 @@ func main() {
 }
 ```
 
-## Contacting me
-Raise an issue or PR here
-Discord: mt_inside#8886
+## Contributing
+PRs welcome!
+
+### Reaching me
+* Raise an issue or PR here
+* Discord: mt_inside#8886
+* Twitter: @mt165
