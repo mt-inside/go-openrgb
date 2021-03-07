@@ -9,15 +9,6 @@ import (
 	"github.com/mt-inside/go-openrgb/pkg/wire"
 )
 
-/* TODO
-* - commit all this
-* - add the fake zone in effectModes, remove so much complexity in there and in mode.go
-* - setting colors for non-direct modes doesn't work?
-* - deal with switchying modes - should be able to set and get active mode, and most of the *Direct stuff actually wants to work on the currently active mode, panicing if it's not direct
-*   - do the PR to openrgb
-* - deal with writing non-direct modes (see Thither())
- */
-
 // TODO rename to System
 type Model struct {
 	log     logr.Logger
