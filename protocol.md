@@ -1,3 +1,6 @@
+Work in progress!
+TODO: to a GH wiki
+
 ## Types
 bstring
 ```
@@ -50,7 +53,7 @@ ColorCount : 2
     Color : 4
 ```
 
-Object Model
+Object Model, logically
 * A system has devices
   * A device has Modes
     * A Mode has color(s)
@@ -59,7 +62,7 @@ Object Model
       * Direct: n
         * In Direct Mode, you care about the individual LEDs
         * A device has Zones
-          * Zones have (named) LEDS
+          * Zones have (named) LEDs
             * LEDs have a color
 The API doesn't expose it like this, instead:
 * device
@@ -81,52 +84,13 @@ BUT! remeber this is the READ object model.
 
 to have direct control, try in order: direct (per-led, don't flash), custom (per-led, flash), static (one col, flash?)
 
-per-led mode (eg breathing) - how represented?
-orthogonal
+orthogonal things:
 * mode (static, breathing, etc). Call breathing etc dynamic. These have 0 (eg random), 1+ colors (eg flash one, flash between a few)
 * color_mode (mode-specfic ~=1, per-led == n)
 * confused by a lot of stuff not doing the 4th quadrent: per-led, non-static
 Direct: per-led, static, don't flash (constant packet stream, so can do rapid transitions. Reqs on the driver: no fading between colors (instant), no flicker due to bit bang timing)
 Custom: per-led, static, do flash (poersistent, not suitable for rapid transitions)
 Static: mode-specific, static, do flash
-
-what am lib? what am point?
-* this is mostly about werite. Reading doesn't seem too useful programatically, and I don't expect anyone to build an interactive client using this
-* but, to write, we need to know the "schema" - the devices and their configured sizes, so we need to read once - schema and LEDs come over the same request
-* we assume we're the only writer, and can just overwrite evertyhing. This massively simplifies things, otherwise we'd need a state object, TF style 3-way diff, and either overwrite or prompt for conflicts
-* becuase of this, we can just smash our object model up to the server
-* read colors into it, should you care, and modify from there
-* as a convenience, we'll provide a *local* diff, against what you last read (overwritten by our writes).
-* no schema write support for now
-
-* session: getSchema() [build middle objects, return new, no attempt to merge for now] -> syncColors() [into middle object] -> modify -> diff -> writeCOlors()
-
-TODO to GH. Add
-* get building on windows...
-* wtf fan curves (reboot to look. custom silent to 60?)
-  * ask on reddit/amd - do I need to wait for the kernel to see all my fans? Doesn't seem to be any config for this module.
-
-lib: impliment object model above.
-* How to do? I think:
-  * keep current structs, all internal, named to wireFoo, decode into them (not least, binary.read in future)
-  * make new structs for desired object model, build from wireFoo
-    * drop the opaque Value fields
-    * hide all fields, do mut-ness with getters and (fewer) setters
-    * do the diff thing too, and a pretty-print of it
-    * setters for resizing Zones' LEDs and Modes' color-wheels
-  * prolly have to make wireWriteFoo structs as well to update
-* assert that mode-per-led never has colours in it on the wire
-* throw away led.value, mode.flags etc, at the wireReadFoo level
-* doing it this way won't mask any features I don't think - can still set inactive modes' colors, per-led static and dynamic
-* my lib is kinda focussed on setting colors *now*, rather than programming up the flash, so it'll warn you if you're coloring inactive modes etc.
-  * doc: if you wanna programme up your controller's flash, do this
-  * doc: if you wanna be setting your LEDs in real-time, do this
-  * doc: basics of API like the orthogonal modes. Link to wire protocol doc.
-lib: should be able to set color at
-* device - applies to currently-active mode (log.info this) (the one color for a single-col mode, the color for every LED in direct, error if in a zero-color mode). Color is: color, or random
-  * mode - same as above, but for a named mode (log.info this if mode is not the active one)
-    * zone (applies to direct only, log.info this if direct isn't active)
-      * led (ditto)
 
 Semantics
 * Colors
@@ -145,12 +109,3 @@ Semantics
   * Devices have Colors
     * These are the actual colors of the LEDs
     * They seem to match to LEDs (and thus pack into Zones) just based on index correspondance
-
-Separate PR so we can argue about it: Also if you'd accept a change in API semantics, I'd propose changing the current UPDATEMODE to NOT _set the active mode_, and I'd also rename it to SETMODEDESCRIPTION
-
-
-TODO: publish go-sensors (with get() and observable interfaces) (or pick a name) (to openrgb discord), make lightload example with rxgo
-Examples
-* X current main
-* lightload - in progress
-* X redshift
