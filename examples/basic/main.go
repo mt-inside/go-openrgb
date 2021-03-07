@@ -18,9 +18,9 @@ func main() {
 	}
 
 	m.SetColor(colorful.Color{R: 1, G: 0, B: 0})
-	// m.Devices.MustByName("B550 Vision D").MustGetDirectModeAndActivate().SetColor(colorful.Color{R: 0, G: 1, B: 0})
-	// m.Devices.MustByName("B550 Vision D").MustGetDirectModeAndActivate().Zones.MustByName("D_LED1 Bottom").SetColor(colorful.Color{R: 0, G: 0, B: 1})
-	// m.Devices.MustByName("B550 Vision D").MustGetDirectModeAndActivate().Zones.MustByName("D_LED1 Bottom").Leds[0].SetColor(colorful.Color{R: 1, G: 1, B: 1})
+	m.Devices.MustByName("B550 Vision D").MustGetDirectModeAndActivate().SetColor(colorful.Color{R: 0, G: 1, B: 0})
+	m.Devices.MustByName("B550 Vision D").MustGetDirectModeAndActivate().Zones.MustByName("D_LED1 Bottom").SetColor(colorful.Color{R: 0, G: 0, B: 1})
+	m.Devices.MustByName("B550 Vision D").MustGetDirectModeAndActivate().Zones.MustByName("D_LED1 Bottom").Leds[0].SetColor(colorful.Color{R: 1, G: 1, B: 1})
 
 	m.Diff()
 
