@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/go-logr/logr"
 	"github.com/lucasb-eyer/go-colorful"
 	"github.com/mt-inside/go-openrgb/pkg/wire"
@@ -198,7 +197,6 @@ func (m *Model) Thither() error {
 			wireMode.Colors = colors
 		}
 
-		spew.Dump(wireMode)
 		err := wire.SendUpdateMode(m.client, d.index, &wireMode)
 		if err != nil {
 			return err

@@ -71,7 +71,7 @@ func (d *Device) MustGetDirectModeAndActivate() *DirectMode {
 	// Search for a direct mode, return the first
 	for _, m := range d.Modes {
 		if dm, ok := m.(*DirectMode); ok {
-			d.log.Info("Found an arbitrary Direct mode, but there may be more than one", "mode", dm.GetName())
+			d.log.V(1).Info("Found an arbitrary Direct mode, but there may be more than one", "mode", dm.GetName())
 			return dm
 		}
 	}
@@ -91,7 +91,7 @@ func (d *Device) GetName() string {
 func (d *Device) Size() int {
 	m := d.GetActiveMode()
 	if _, ok := m.(*DirectMode); !ok {
-		d.log.Info("Getting size of active mode, but mode is not Direct; this may not be what you want.", "mode", m.GetName())
+		d.log.V(1).Info("Getting size of active mode, but mode is not Direct; this may not be what you want.", "mode", m.GetName())
 	}
 	return m.Size()
 }
@@ -103,7 +103,7 @@ func (d *Device) SetColor(c colorful.Color) {
 func (d *Device) SetColors(cs []colorful.Color) {
 	m := d.GetActiveMode()
 	if _, ok := m.(*DirectMode); !ok {
-		d.log.Info("Setting color(s) of active mode, but mode is not Direct; this may not be what you want.", "mode", m.GetName())
+		d.log.V(1).Info("Setting color(s) of active mode, but mode is not Direct; this may not be what you want.", "mode", m.GetName())
 	}
 	m.SetColors(cs)
 }
