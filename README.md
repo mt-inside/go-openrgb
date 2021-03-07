@@ -1,12 +1,10 @@
 # go-openrgb
-Golang SDK for [OpenRGB](https://gitlab.com/CalcProgrammer1/OpenRGB)
-
 [![Checks](https://github.com/mt-inside/go-openrgb/actions/workflows/checks.yaml/badge.svg)](https://github.com/mt-inside/go-openrgb/actions/workflows/checks.yaml)
 [![GitHub Issues](https://img.shields.io/github/issues-raw/mt-inside/go-openrgb)](https://github.com/mt-inside/go-openrgb/issues)
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/mt-inside/go-openrgb.svg)](https://pkg.go.dev/github.com/mt-inside/go-openrgb)
 
-Uses the [lm-sensors](https://github.com/lm-sensors/lm-sensors) (linux monitoring sensors) pacakge, on top of the [hwmon](https://hwmon.wiki.kernel.org) kernel feature.
+Golang SDK for [OpenRGB](https://gitlab.com/CalcProgrammer1/OpenRGB)
 
 ## Setup
 * Install and Configure _OpenRGB_
