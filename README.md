@@ -1,6 +1,7 @@
 # go-openrgb
 [![Checks](https://github.com/mt-inside/go-openrgb/actions/workflows/checks.yaml/badge.svg)](https://github.com/mt-inside/go-openrgb/actions/workflows/checks.yaml)
 [![GitHub Issues](https://img.shields.io/github/issues-raw/mt-inside/go-openrgb)](https://github.com/mt-inside/go-openrgb/issues)
+[![go reportcard](https://goreportcard.com/badge/github.com/mt-inside/go-openrgb)](https://goreportcard.com/report/github.com/mt-inside/go-openrgb)
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/mt-inside/go-openrgb.svg)](https://pkg.go.dev/github.com/mt-inside/go-openrgb)
 
