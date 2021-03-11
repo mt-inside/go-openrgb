@@ -44,7 +44,7 @@ bstring:
 > This use of variable-length strings in the middle of records means you can't simply interpret the wire bytes as a record type (eg cast to a struct in C, TODO in go, TODO in python).
 
 > NB: every message _received_ from OpenRGB uses these bstrings.
-Some messages _send_ to the server do, some don't...
+Some messages _sent_ to the server do, some don't...
 
 ## Object Model
 A natural object model might be:
@@ -53,13 +53,17 @@ A natural object model might be:
     * Zones
       * LEDs
 
-The OpenRGB protocol doesn't provide this model, nor does it match the hierarchy in the OpenRGB UI or even code.
+The OpenRGB protocol is explicity desinged to be as bandwidth efficient as possible.
+Thus, it doesn't follow this model, nor does it follow the models in the OpenRGB UI or even code.
+
 Read requests can only be made at the level of _Device_.
-Write requests can be made at _Device_, _Zone_, and _LED_.
+Everything else is flattened into _Device_, and can't be fetched separately.
+Some stuff is denormalised, eg LEDs are stored outside of the Zones, qv.
 
-> The protocol is so device-centric that every message has a common header which includes _device ID_ (ignored for a few of the metadata commands like setting client name)
+Write requests can be made at _Device_, _Zone_, and _LED_ levels.
 
-The protocol is explicity desinged to be as bandwidth efficient as possible so is normalised.
+> The protocol is so device-centric that every message has a common header which includes _device ID_ (which is ignored for a few of the metadata commands like setting client name)
+
 
 ## Versioning
 
@@ -68,14 +72,16 @@ Versions are precise; no forwards or backwards compatibility is afforded.
 
 This version number isn't in normal wire messages.
 * You can read the server's version with the separate _GetProtocolVersion_ command.
-* Your client doesn't report or negotiate its version with the server; you just have to see which version the server expects and send that. Because request messages don't contain the verion, the server blindly attempts to unpack the bytes you send into its structures. If you've sent the wrong version (or just malformed the request), random stuff will happen, possibly even dangerous things involving writing to memory and controller flash.
+* Your client doesn't report or negotiate its version with the server; you just have to see which version the server expects and send that schema, again without a version field.
+
+> Because request messages don't contain the verion, the server blindly attempts to unpack the bytes you send into its structures. If you've sent the wrong version (or just malformed the request), random stuff will happen, possibly even dangerous things involving writing to memory and controller flash.
 
 
 ## Headers
 For both request and response, each message's first 16 bytes are a common header format, as follows:
 
 ```
-magic = "ORGB" : 4  # Trivia: OpenRGB's port number, 6742, are the digits corresponding to "ORGB" on a phone keypad.
+magic = "ORGB" : 4  # Trivia: OpenRGB's port number, 6742, is the digits corresponding to "ORGB" on a phone keypad.
 device id : 4
 command id : 4
 body length : 4
@@ -87,7 +93,7 @@ In a request, you set the fields obviously.
 
 In a response, device id and command id will be echoed back to you; assert that if you want.
 
-Although device and command id are echoed back, notice that there's no sequence number - there isn't enough information to tie a response back to a request.
+Although device and command id are echoed back, notice that there's no sequence number; there isn't enough information to tie a response back to a request.
 I _believe_ that the server is single-threaded, so a reply will be sent before the next request is read, guarenteeing the ordering on the wire.
 Note that this will cause you problems if you try to mutli-thread your client and reuse the same socket.
 
@@ -96,7 +102,7 @@ Commands the request data (like getting a device) elcit a response.
 Commands that don't, do not recieve any kind of response.
 Ie you don't even get a header and empty body as an ACK.
 
-The OpenRGB protocol works over TCP, so unreliable networks are dealt with (or at least you're notified about issues - be sure to actually read the return codes from `send()`).
+The OpenRGB protocol works over TCP, so unreliable networks are dealt with (or at least you're notified about issues - be sure to actually read the return value from `send()`).
 
 As for application-level, uh, good luck.
 Cross your fingers there aren't any errors, and if you're paranoid I guess just re-assert the command periodically, as most (all?) are idempotent.
@@ -134,7 +140,7 @@ nul-terminator : 1
 
 **NB** The string you send is NOT an OpenRGB headed "bstring".
 However it DOES need the '\0' terminator.
-Despite a) the protocol's heavy use of headed strings, and b) the presence of the string's length in the header (as _name_ is the only field), memory is blindly read.
+Despite a) the protocol's heavy use of headed strings, and b) the presence of the string's length in the header (as _name_ is the only field), the memory containing the user-input is blindly read.
 If the UI shows your client's name as "foo���", that's a dead giveaway that you forgot the terminator.
 
 ### Response
@@ -176,13 +182,13 @@ header : 16
 ### Response
 ```
 header : 16
-body lenght : 4 # This duplicates the length field in the header. Neither are actually necessary because everything field is of a known or stated size
+body length : 4 # This duplicates the length field in the header. Neither are actually necessary because everything field is of a known or stated size
 type : 4
 name : bstring
-description
-version
-serial
-location
+description : bstring
+version : bstring
+serial : bstring
+location : bstring
 mode_count : 2
 active_mode_index : 4
     Name : bstring
@@ -204,7 +210,7 @@ zone_count : 2
     MaxLEDs : 4
     TotalLEDs : 4
     MatrixSize : 2
-    Matrix : MatrixSize
+    Matrix : $MatrixSize
 led_count : 2
     Name : bstring
     Color : 4
@@ -212,6 +218,14 @@ ColorCount : 2
     Color : 4
 ```
 
+Device Type
+* 0 - Motherboard
+* 1 - DIMM
+* 2 - GPU
+* etc - [use the source](https://gitlab.com/CalcProgrammer1/OpenRGB/-/blob/master/RGBController/RGBController.h#L106)
+
+
+# Appendix
 Object Model
 * A system has devices
   * A device has Modes
