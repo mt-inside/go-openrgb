@@ -60,7 +60,7 @@ func (z *Zone) SetColor(c colorful.Color) {
 }
 func (z *Zone) SetColors(cs []colorful.Color) {
 	if z.Size() != len(cs) {
-		panic(fmt.Errorf("Trying to set %d-led Zone with %d colors.", len(z.Leds), len(cs)))
+		panic(fmt.Errorf("trying to set %d-led Zone with %d colors", len(z.Leds), len(cs)))
 	}
 	for i := range z.Leds {
 		z.Leds[i].SetColor(cs[i])

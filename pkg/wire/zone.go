@@ -3,24 +3,38 @@ package wire
 import "fmt"
 
 //go:generate stringer -type=ZoneType
+// ZoneType specifies how the zone should be interpreted.
+// On the wire, all zones are necessarily 1-D vectors, so ZoneType says how they should be interpreted.
 type ZoneType uint32
 
 const (
-	Singular ZoneType = 0 // Doesn't imply precisely 1 LED. TODO what are the invariants.
-	Linear   ZoneType = 1
-	Planar   ZoneType = 2 // Still a linear array of LEDs on the wire, but also with a Matrix to tell you how to place them
+	// Singular means a point. Doesn't imply precisely 1 LED; I've seen 8-led Singular
+	// zones. TODO what are the invariants?
+	Singular ZoneType = 0
+	// Linear means a line of LEDs.
+	Linear ZoneType = 1
+	// Planar menas a grid of LEDs. I think this is coupled to a non-empty Matrix (with the
+	// matrix width and height giving the shape of the grid, and the matrix
+	// itself giving the positions of its LEDs). If this is the case, this
+	// field seems redundant?
+	Planar ZoneType = 2
 )
 
+// Zone represents a sub-section of a device, ie some of its LEDs.
+// Zones are only useful with using per-LED-color "direct" modes.
+// All Devices have at least one zone; if the physical device doesn't really have separate zones (like a DRAM DIMM), OpenRGB fakes one up.
 type Zone struct {
-	Index        uint16
-	Name         string
-	Type         ZoneType
-	MinLEDs      uint32 // min!=max => user-resizable (depending on what's plugged in)
+	Index uint16
+	Name  string
+	Type  ZoneType
+	// min!=max => user-resizable (ie tell OpenRGB how many addresses the device plugged into this controller has)
+	MinLEDs      uint32
 	MaxLEDs      uint32
-	TotalLEDs    uint32 // current size?
-	MatrixWidth  uint32
-	MatrixHeight uint32
-	Maxtrix      [][]uint32
+	TotalLEDs    uint32 // current size
+	MatrixWidth  uint32 // zero for non-Planar zones
+	MatrixHeight uint32 // zero for non-Planar zones
+	// To be interpreted as a grid sized as MatrixWidth x MatrixHeight. This is meant for keyboards and the like, specifying which parts of the grid have bottons/lights ,and which don't. TODO: don't know what the values in this represent.
+	Maxtrix [][]uint32
 }
 
 func extractZones(buf []byte, offset *int) []*Zone {

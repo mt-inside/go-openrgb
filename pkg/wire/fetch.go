@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// FetchDevices reads and decodes all the Devices in a system / OpenRGB server.
 func FetchDevices(c *Client) ([]*Device, error) {
 	deviceCount, err := fetchDeviceCount(c)
 	if err != nil {
@@ -26,7 +27,7 @@ func FetchDevices(c *Client) ([]*Device, error) {
 * Everything has a length header.
 * Devices' length is fetched by a separate command.
 * Then each device by a command.
-* Within a device, zones etc aren't API commands, they're packed into the binary blob, with thier length preceeding them */
+* Within a device, zones etc aren't API commands, they're packed into the binary blob, with their length preceding them */
 func fetchDeviceCount(c *Client) (uint32, error) {
 	if err := c.sendCommand(0, cmdGetDevCnt, []byte{}); err != nil {
 		return 0, fmt.Errorf("Couldn't fetch Device count: %w", err)

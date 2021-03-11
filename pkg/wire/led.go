@@ -1,5 +1,12 @@
 package wire
 
+// LED represents an actual LED in a device, which can emit a color. On the
+// wire protocol however, the LED objects don't contain the colors they're
+// emitting.
+// Note that in some devices, the addresses on the bus don't correspond
+// one-to-one with physical LEDs (probably SMT devices). Sometimes an address
+// addresses more than one LED. This object represents addresses, ie what can
+// be addressed by the controller.
 type LED struct {
 	Index uint16
 	Name  string

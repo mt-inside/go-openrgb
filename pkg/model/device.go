@@ -11,6 +11,7 @@ import (
 
 type DeviceList []*Device
 
+// TODO: device names now guarenteed to be unique
 func (list DeviceList) ByName(name string) []*Device {
 	ds := []*Device{}
 
@@ -25,12 +26,13 @@ func (list DeviceList) ByName(name string) []*Device {
 func (list DeviceList) MustByName(name string) *Device {
 	ds := list.ByName(name)
 	if len(ds) != 1 {
-		panic(fmt.Errorf("Not presicely one mode with name: %s", name))
+		panic(fmt.Errorf("Not precisely one mode with name: %s", name))
 	}
 	return ds[0]
 }
 
 type Device struct {
+	//TODO how many of these are used? They should mostly be left to wireInfo (which is missing here?)
 	log              logr.Logger
 	model            *Model
 	index            uint32

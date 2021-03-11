@@ -7,8 +7,10 @@ import (
 )
 
 //go:generate stringer -type=DeviceType
+// DeviceType models the various different types of product that an RGB Controller can be present in.
 type DeviceType int
 
+// Types are self-explainatory.
 const (
 	Motherboard  DeviceType = 0
 	DIMM         DeviceType = 1
@@ -26,6 +28,9 @@ const (
 	Unknown      DeviceType = 13
 )
 
+// Device represents the natural idea of a device in a system, eg a RAM stick,
+// graphics card, etc with RGB lighting. Technically it maps to a controller
+// chip which can be sent commands over a bus.
 type Device struct {
 	Index         uint32
 	Type          DeviceType
@@ -33,7 +38,7 @@ type Device struct {
 	Description   string
 	Version       string
 	Serial        string
-	Location      string
+	Location      string // Bus address eg /dev/i2c-0, address 0x3C
 	ActiveModeIdx uint32
 	Modes         []*Mode
 	Zones         []*Zone

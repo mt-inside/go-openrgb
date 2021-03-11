@@ -9,11 +9,16 @@ import (
 	"github.com/go-logr/logr"
 )
 
+// Client represents an open connection to an OpenRGB server.
 type Client struct {
 	log  logr.Logger
 	sock net.Conn
 }
 
+// NewClient returns a new Client that is connected to the server at addr. If a
+// connection can't be established, or there's a protocol or other problem, an
+// error is returned and Client in nil. userAgent is the string given to the
+// server to identify this client software; it does not need to be unique.
 func NewClient(log logr.Logger, addr, userAgent string) (*Client, error) {
 	c := &Client{log: log.WithName("client")}
 
@@ -52,6 +57,8 @@ func NewClient(log logr.Logger, addr, userAgent string) (*Client, error) {
 	return c, nil
 }
 
+// Close terminates the connection to the OpenRGB server, by amougst other
+// things closing the TCP stream.
 func (c *Client) Close() error {
 	c.log.V(2).Info("Disconnected")
 
@@ -124,7 +131,7 @@ func encodeHeader(deviceID, commandID, bodyLen uint32) []byte {
 	return header[:]
 }
 
-func decodeHeader(header []byte) (deviceId, commandId, bodyLen uint32) {
+func decodeHeader(header []byte) (deviceID, commandID, bodyLen uint32) {
 	l := len(header)
 	if l != headerLen {
 		panic(fmt.Sprintf("Header length incorrect. Expected: %d, got: %d", headerLen, l))

@@ -11,30 +11,34 @@ import (
 const knownProtoVer = 2
 
 //go:generate stringer -type=Command
+// Command is the integer sent to OpenRGB to indicate which action we want to perform on its RPC API.
 type Command int
 
 const (
-	// Devices
-	cmdGetDevCnt  Command = 0
-	cmdGetDevData Command = 1
-	// Protocol
-	cmdGetProtocolVersion Command = 40 //nolint:varcheck,deadcode,unused
+	// Protocol meta
+	cmdGetProtocolVersion Command = 40
 	cmdSetClientName      Command = 50
-	// Streaming support?
-	queDevListUpdated Command = 100 //nolint:varcheck,deadcode,unused
-	// Manipulation of profiles
+
+	// Devices and LEDs
+	cmdGetDevCnt         Command = 0
+	cmdGetDevData        Command = 1
+	cmdUpdateLEDs        Command = 1050 //nolint:varcheck,deadcode,unused
+	cmdUpdateZoneLEDs    Command = 1051 //nolint:varcheck,deadcode,unused
+	cmdUpdateSingularLED Command = 1052 //nolint:varcheck,deadcode,unused
+
+	// Streaming support? TODO
+	cmdDevListUpdated Command = 100 //nolint:varcheck,deadcode,unused
+
+	// Object model manipulation
+	cmdResizeZone    Command = 1000 //nolint:varcheck,deadcode,unused
+	cmdSetCustomMode Command = 1100 //nolint:varcheck,deadcode,unused
+	cmdUpdateMode    Command = 1101 //nolint:varcheck,deadcode,unused
+
+	// Profile manipulation
 	cmdGetProfileList Command = 150 //nolint:varcheck,deadcode,unused
 	cmdSaveProfile    Command = 151 //nolint:varcheck,deadcode,unused
 	cmdLoadProfile    Command = 152 //nolint:varcheck,deadcode,unused
 	cmdDeleteProfile  Command = 153 //nolint:varcheck,deadcode,unused
-
-	// Setting colors
-	cmdResizeZone        Command = 1000 //nolint:varcheck,deadcode,unused
-	cmdUpdateLEDs        Command = 1050 //nolint:varcheck,deadcode,unused
-	cmdUpdateZoneLEDs    Command = 1051 //nolint:varcheck,deadcode,unused
-	cmdUpdateSingularLED Command = 1052 //nolint:varcheck,deadcode,unused
-	cmdSetCustomMode     Command = 1100 //nolint:varcheck,deadcode,unused
-	cmdUpdateMode        Command = 1101 //nolint:varcheck,deadcode,unused
 )
 
 func extractUint8(buf []byte, offset *int) uint8 {
@@ -68,7 +72,7 @@ func extractColor(buf []byte, offset *int) colorful.Color {
 	r := extractUint8(buf, offset)
 	g := extractUint8(buf, offset)
 	b := extractUint8(buf, offset)
-	*offset += 1 // Colors are padded to 4 bytes
+	*offset++ // Colors are padded to 4 bytes
 
 	return colorful.Color{R: float64(r) / 255.0, G: float64(g) / 255.0, B: float64(b) / 255.0}
 }

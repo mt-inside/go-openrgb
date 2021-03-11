@@ -6,11 +6,14 @@ import (
 	"github.com/lucasb-eyer/go-colorful"
 )
 
+// UpdateLEDs is the struct used on the wire for the payload to an UpdateLEDs
+// command
 type UpdateLEDs struct {
 	DeviceID uint32
 	Colors   []colorful.Color
 }
 
+// SendUpdateLEDs sends a (whole-device) UpdateLEDs command.
 func SendUpdateLEDs(c *Client, wd *UpdateLEDs) error {
 	colorsLen := len(wd.Colors)
 	bufLen := 4 + 2 + (colorsLen * 4) // TODO this using sizeof, but not reflect?
@@ -38,7 +41,7 @@ func SendUpdateLEDs(c *Client, wd *UpdateLEDs) error {
 }
 
 // Updates just one zone (or, rather, legacy code that renders the command to do so).
-// Use this to impliment a zone writer, also do a singular writer, then have Thither() take/work on a patch, and be optimal
+// Use this to implement a zone writer, also do a singular writer, then have Thither() take/work on a patch, and be optimal
 // - if the patch has >1 device use WriteDevices. >1 zone, use WriteDevice, >1 LED use this, 1 LED use WriteLED
 //nolint:deadcode,unused
 func getCommandZoneLEDs(zoneID uint32, colors []colorful.Color) []byte {
@@ -63,7 +66,7 @@ func getCommandZoneLEDs(zoneID uint32, colors []colorful.Color) []byte {
 	return buf
 }
 
-// TODO: becuase this is basically a serialisation of the wire object, move it into mode.go next to extractMode
+// TODO: because this is basically a serialisation of the wire object, move it into mode.go next to extractMode
 // TODO There should be one func in this file per cmd verb
 // most, like this one, should defer to "insertFoo". Write*LEDs are special, because those commands don't have "Request" mirrors, and so they need their own structs
 
@@ -88,6 +91,9 @@ func getCommandZoneLEDs(zoneID uint32, colors []colorful.Color) []byte {
 *   - The NetworkServer only exposes SetModeDescription(). This does change active_mode, and then call UpdateMode(), but you have to play the whole Mode description back at it.
 *     - NetworkProtocol.h is downright misleading, cause the comment says it calls UpdateMode() when actually it calls SetModeDescription()
  */
+
+// SendUpdateMode sends a command to update the details of an existing mode; overwriting the mode at the given index.
+// On the network API as it stands (v2), this is the only way to change the active mode - reassert a mode exactly as-was, but the act of asserting it causes it to activate.
 func SendUpdateMode(c *Client, deviceID uint32, mode *Mode) error {
 	bufLen := 4 + (2 + len(mode.Name) + 1) + 9*4 + 2 + len(mode.Colors)*4 // TODO this using sizeof, but not reflect?
 	buf := make([]byte, bufLen)
@@ -105,7 +111,7 @@ func SendUpdateMode(c *Client, deviceID uint32, mode *Mode) error {
 	insertUint32(buf, &offset, uint32(mode.Direction))
 	insertUint32(buf, &offset, uint32(mode.ColorMode))
 	// TODO: extract to insertColors, to match extracting.
-	// Because of this, pre-calcualting buf lenght will be impossible, so just use a damn Buffer and Writer (effectively ByteBuilder)
+	// Because of this, pre-calculating buf length will be impossible, so just use a damn Buffer and Writer (effectively ByteBuilder)
 	insertUint16(buf, &offset, uint16(len(mode.Colors)))
 	for _, c := range mode.Colors {
 		insertColor(buf, &offset, c)
