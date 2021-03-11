@@ -131,6 +131,7 @@ func (d *Device) render(indent int) []indentedString {
 	ss := []indentedString{
 		{indent, fmt.Sprintf("DEVICE [%s] %s", d.devType, d.GetName())},
 		{indent + 1, d.description},
+		{indent + 1, "At " + d.location},
 		{indent + 1, fmt.Sprintf("Active mode: %s", d.newActiveMode.GetName())},
 	}
 	for _, mode := range d.Modes {
