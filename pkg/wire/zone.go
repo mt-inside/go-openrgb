@@ -69,6 +69,9 @@ func extractZone(buf []byte, offset *int, idx uint16) *Zone {
 		if uint16(4+4+(z.MatrixHeight*z.MatrixWidth*4)) != matrixSize {
 			panic("Assertion failed: planar Zone matrix sizes don't add up")
 		}
+		if z.MatrixHeight*z.MatrixWidth != z.TotalLEDs {
+			panic("Assertion failed: planar Zone matrix sizes don't add up")
+		}
 		fmt.Printf("TODO matrix: %d x %d\n", z.MatrixWidth, z.MatrixHeight)
 
 		*offset += int(matrixSize) - 4 - 4
