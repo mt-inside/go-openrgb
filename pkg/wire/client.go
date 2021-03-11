@@ -46,7 +46,7 @@ func NewClient(log logr.Logger, addr, userAgent string) (*Client, error) {
 		return nil, fmt.Errorf("Server protocol version: %d; we support: %d", protoVer, knownProtoVer)
 	}
 
-	err = c.sendCommand(0, cmdSetClientName, []byte(userAgent))
+	err = c.sendCommand(0, cmdSetClientName, []byte(userAgent+"\000")) // Not a headed bstring, but does need the terminator
 	if err != nil {
 		c.Close()
 		return nil, fmt.Errorf("Couldn't set client name: %w", err)
